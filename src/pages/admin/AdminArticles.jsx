@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { articlesApi } from '../../services/api';
-import { Plus, Edit, Trash2, Eye, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, FileText, Calendar, User, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
 
@@ -32,42 +32,40 @@ const AdminArticles = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [filter, setFilter] = useState('all'); // 'all', 'published', 'draft'
+  const [filter, setFilter] = useState('all');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [articleToDelete, setArticleToDelete] = useState(null);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadArticles();
   }, [page, filter]);
 
-// In your AdminArticles.jsx, update loadArticles function:
-const loadArticles = async () => {
-  try {
-    setLoading(true);
-    
-    const params = {
-      page,
-      pageSize: 20
-    };
-    
-    // Add filter for admin (only show drafts for admin users)
-    if (filter === 'published') {
-      params.isPublished = true;
-    } else if (filter === 'draft') {
-      params.isPublished = false;
+  const loadArticles = async () => {
+    try {
+      setLoading(true);
+      
+      const params = {
+        page,
+        pageSize: 15 // Reduced for better mobile view
+      };
+      
+      if (filter === 'published') {
+        params.isPublished = true;
+      } else if (filter === 'draft') {
+        params.isPublished = false;
+      }
+      
+      const response = await articlesApi.getAllAdmin(params);
+      setArticles(response.data.data);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error('Error loading articles:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    // Use getAllAdmin instead of getAll
-    const response = await articlesApi.getAllAdmin(params);
-    setArticles(response.data.data);
-    setTotalPages(response.data.totalPages);
-  } catch (error) {
-    console.error('Error loading articles:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleDeleteClick = (id, title) => {
     setArticleToDelete({ id, title });
@@ -90,9 +88,9 @@ const loadArticles = async () => {
 
   const formatDate = (article) => {
     if (article.publishedAt) {
-      return format(new Date(article.publishedAt), 'd. MMM yyyy', { locale: hr });
+      return format(new Date(article.publishedAt), 'd. MMM', { locale: hr });
     }
-    return format(new Date(article.createdAt), 'd. MMM yyyy', { locale: hr });
+    return format(new Date(article.createdAt), 'd. MMM', { locale: hr });
   };
 
   const getStatusColor = (isPublished) => {
@@ -101,6 +99,10 @@ const loadArticles = async () => {
 
   const getStatusText = (isPublished) => {
     return isPublished ? 'Objavljeno' : 'Draft';
+  };
+
+  const getStatusIcon = (isPublished) => {
+    return isPublished ? '●' : '◌';
   };
 
   if (loading) {
@@ -128,17 +130,33 @@ const loadArticles = async () => {
       <div>
         <div className="admin-header">
           <h1>Upravljanje člancima</h1>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate('/admin/clanci/novi')}
-          >
-            <Plus size={18} />
-            Novi članak
-          </button>
+  <button
+    className="btn btn-primary"
+    onClick={() => navigate('/admin/clanci/novi')}
+    style={{ 
+      padding: '0.875rem 2rem',
+      fontWeight: '700',
+      letterSpacing: '0.3px'
+    }}
+  >
+    <Plus size={18} />
+    <span className="desktop-only">Novi članak</span>
+    <span className="mobile-only">Novi</span>
+  </button>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="filter-tabs" style={{ marginBottom: '2rem' }}>
+        {/* Mobile Filter Button */}
+        <button
+          className="btn btn-secondary mobile-only"
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
+          style={{ marginBottom: '1rem', width: '100%' }}
+        >
+          <Filter size={18} />
+          Filtriraj: {filter === 'all' ? 'Svi' : filter === 'published' ? 'Objavljeni' : 'Draftovi'}
+        </button>
+
+        {/* Filter Tabs - Desktop */}
+        <div className="filter-tabs desktop-only" style={{ marginBottom: '2rem' }}>
           <button
             className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
@@ -159,56 +177,129 @@ const loadArticles = async () => {
           </button>
         </div>
 
+        {/* Mobile Filter Dropdown */}
+        {showMobileFilters && (
+          <div className="mobile-only" style={{
+            marginBottom: '1rem',
+            background: 'var(--bg-card)',
+            borderRadius: '0.75rem',
+            border: '1px solid var(--border)',
+            padding: '1rem'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <button
+                className={`filter-tab-mobile ${filter === 'all' ? 'active' : ''}`}
+                onClick={() => {
+                  setFilter('all');
+                  setShowMobileFilters(false);
+                }}
+                style={{
+                  padding: '0.75rem',
+                  background: filter === 'all' ? 'var(--primary)' : 'var(--bg-tertiary)',
+                  color: filter === 'all' ? 'white' : 'var(--text-primary)',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  textAlign: 'left'
+                }}
+              >
+                Svi članci
+              </button>
+              <button
+                className={`filter-tab-mobile ${filter === 'published' ? 'active' : ''}`}
+                onClick={() => {
+                  setFilter('published');
+                  setShowMobileFilters(false);
+                }}
+                style={{
+                  padding: '0.75rem',
+                  background: filter === 'published' ? 'var(--primary)' : 'var(--bg-tertiary)',
+                  color: filter === 'published' ? 'white' : 'var(--text-primary)',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  textAlign: 'left'
+                }}
+              >
+                Objavljeni
+              </button>
+              <button
+                className={`filter-tab-mobile ${filter === 'draft' ? 'active' : ''}`}
+                onClick={() => {
+                  setFilter('draft');
+                  setShowMobileFilters(false);
+                }}
+                style={{
+                  padding: '0.75rem',
+                  background: filter === 'draft' ? 'var(--primary)' : 'var(--bg-tertiary)',
+                  color: filter === 'draft' ? 'white' : 'var(--text-primary)',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  textAlign: 'left'
+                }}
+              >
+                Draftovi
+              </button>
+            </div>
+          </div>
+        )}
+
         {articles.length > 0 ? (
           <>
-            <div style={{ overflowX: 'auto' }}>
+            {/* Desktop Table */}
+            <div className="table-container desktop-only">
               <table className="table">
                 <thead>
                   <tr>
                     <th>Naslov</th>
-                    <th>Kategorija</th>
-                    <th>Autor</th>
-                    <th>Pregledi</th>
-                    <th>Datum</th>
                     <th>Status</th>
-                    <th>Akcije</th>
+                    <th>Datum</th>
+                    <th style={{ width: '150px' }}>Akcije</th>
                   </tr>
                 </thead>
                 <tbody>
                   {articles.map((article) => (
                     <tr key={article.id} className={!article.isPublished ? 'draft-row' : ''}>
-                      <td style={{ maxWidth: '300px' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                          {!article.isPublished && (
-                            <FileText size={16} color="#f59e0b" style={{ flexShrink: 0, marginTop: '0.125rem' }} />
-                          )}
-                          <div>
-                            <strong>{article.title}</strong>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                          <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: getStatusColor(article.isPublished),
+                            marginTop: '0.5rem',
+                            flexShrink: 0
+                          }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
+                              {article.title}
+                            </strong>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                {article.categoryName}
+                              </span>
+                              <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <User size={12} />
+                                {article.authorName}
+                              </span>
+                              <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <Eye size={12} />
+                                {article.viewCount}
+                              </span>
+                            </div>
                             {article.summary && (
-                              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
-                                {article.summary.length > 100 ? `${article.summary.substring(0, 100)}...` : article.summary}
+                              <p style={{
+                                fontSize: '0.875rem',
+                                color: 'var(--text-secondary)',
+                                marginTop: '0.5rem',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden'
+                              }}>
+                                {article.summary}
                               </p>
                             )}
                           </div>
                         </div>
-                      </td>
-                      <td>
-                        <span className="category-badge">{article.categoryName}</span>
-                      </td>
-                      <td>{article.authorName}</td>
-                      <td>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <Eye size={14} />
-                          {article.viewCount}
-                        </span>
-                      </td>
-                      <td>
-                        {formatDate(article)}
-                        {!article.isPublished && (
-                          <div style={{ fontSize: '0.75rem', color: '#f59e0b' }}>
-                            (draft)
-                          </div>
-                        )}
                       </td>
                       <td>
                         <span className="status-badge" style={{ 
@@ -219,28 +310,31 @@ const loadArticles = async () => {
                         </span>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Calendar size={14} />
+                          {formatDate(article)}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="table-actions">
                           <button
-                            className="btn btn-secondary"
+                            className="btn btn-secondary btn-sm"
                             onClick={() => navigate(`/admin/clanci/uredi/${article.id}`)}
-                            style={{ padding: '0.5rem' }}
                             title="Uredi"
                           >
                             <Edit size={16} />
                           </button>
                           <button
-                            className="btn btn-danger"
+                            className="btn btn-danger btn-sm"
                             onClick={() => handleDeleteClick(article.id, article.title)}
-                            style={{ padding: '0.5rem' }}
                             title="Obriši"
                           >
                             <Trash2 size={16} />
                           </button>
                           {article.isPublished && (
                             <button
-                              className="btn btn-outline"
+                              className="btn btn-outline btn-sm"
                               onClick={() => window.open(`/clanak/${article.slug}`, '_blank')}
-                              style={{ padding: '0.5rem' }}
                               title="Pogledaj članak"
                             >
                               <Eye size={16} />
@@ -252,6 +346,96 @@ const loadArticles = async () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card List */}
+            <div className="mobile-card-list">
+              {articles.map((article) => (
+                <div key={article.id} className="mobile-card">
+                  <div className="mobile-card-header">
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: getStatusColor(article.isPublished),
+                          flexShrink: 0
+                        }} />
+                        <span className="status-badge" style={{ 
+                          fontSize: '0.75rem',
+                          padding: '0.25rem 0.5rem',
+                          backgroundColor: `${getStatusColor(article.isPublished)}20`,
+                          color: getStatusColor(article.isPublished)
+                        }}>
+                          {getStatusText(article.isPublished)}
+                        </span>
+                      </div>
+                      <h3 className="mobile-card-title">
+                        {article.title}
+                      </h3>
+                      {article.summary && (
+                        <p style={{
+                          fontSize: '0.875rem',
+                          color: 'var(--text-secondary)',
+                          marginTop: '0.5rem',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {article.summary}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="mobile-card-details">
+                    <span>
+                      <FileText size={14} />
+                      {article.categoryName}
+                    </span>
+                    <span>
+                      <User size={14} />
+                      {article.authorName}
+                    </span>
+                    <span>
+                      <Calendar size={14} />
+                      {formatDate(article)}
+                    </span>
+                    <span>
+                      <Eye size={14} />
+                      {article.viewCount}
+                    </span>
+                  </div>
+                  
+                  <div className="mobile-card-actions">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => navigate(`/admin/clanci/uredi/${article.id}`)}
+                    >
+                      <Edit size={16} />
+                      Uredi
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDeleteClick(article.id, article.title)}
+                    >
+                      <Trash2 size={16} />
+                      Obriši
+                    </button>
+                    {article.isPublished && (
+                      <button
+                        className="btn btn-outline"
+                        onClick={() => window.open(`/clanak/${article.slug}`, '_blank')}
+                      >
+                        <Eye size={16} />
+                        Pogledaj
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
 
             {totalPages > 1 && (
@@ -273,7 +457,7 @@ const loadArticles = async () => {
                     onClick={() => setPage(page + 1)}
                   >
                     Sljedeća
-                </button>
+                  </button>
                 )}
               </div>
             )}

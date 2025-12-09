@@ -439,18 +439,7 @@ const AdminArticleForm = () => {
               >
                 {isEdit ? 'Nazad' : 'Otkaži'}
               </button>
-              
-              {isEdit && articleId && formData.isPublished && (
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={() => window.open(`/clanak/${formData.slug || ''}`, '_blank')}
-                  disabled={loading}
-                  style={{ marginLeft: 'auto' }}
-                >
-                  Pogledaj članak
-                </button>
-              )}
+
             </div>
           </div>
         </form>
