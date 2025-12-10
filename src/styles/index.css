@@ -2035,6 +2035,52 @@ select.form-control {
   text-align: center;
 }
 
+/* Add to your CSS file */
+.btn-success {
+  background-color: #22c55e;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #16a34a;
+}
+
+.btn-warning {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.btn-warning:hover {
+  background-color: #d97706;
+}
+
+.btn-info {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-info:hover {
+  background-color: #2563eb;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-primary {
+  background-color: var(--primary, #3b82f6);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark, #2563eb);
+}
+
 @media (max-width: 767px) {
   .btn {
     width: 100%;

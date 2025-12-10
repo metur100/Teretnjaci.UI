@@ -3,9 +3,29 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { articlesApi, categoriesApi, imagesApi } from '../../services/api';
 import { Save, ArrowLeft, Upload, X, Star } from 'lucide-react';
 
-// Custom Confirmation Dialog Component
-const ConfirmationDialog = ({ isOpen, title, message, onConfirm, onCancel }) => {
+// Custom Confirmation Dialog Component with hideCancel prop
+const ConfirmationDialog = ({ 
+  isOpen, 
+  title, 
+  message, 
+  onConfirm, 
+  onCancel, 
+  type = "danger", 
+  confirmText = "Potvrdi", 
+  cancelText = "Otkaži",
+  hideCancel = false 
+}) => {
   if (!isOpen) return null;
+
+  const getButtonColor = () => {
+    switch (type) {
+      case 'danger': return 'btn-danger';
+      case 'warning': return 'btn-warning';
+      case 'success': return 'btn-success';
+      case 'info': return 'btn-info';
+      default: return 'btn-primary';
+    }
+  };
 
   return (
     <div className="modal-overlay">
@@ -13,11 +33,13 @@ const ConfirmationDialog = ({ isOpen, title, message, onConfirm, onCancel }) => 
         <h3>{title}</h3>
         <p>{message}</p>
         <div className="modal-actions">
-          <button className="btn btn-secondary" onClick={onCancel}>
-            Otkaži
-          </button>
-          <button className="btn btn-danger" onClick={onConfirm}>
-            Potvrdi
+          {!hideCancel && (
+            <button className="btn btn-secondary" onClick={onCancel}>
+              {cancelText}
+            </button>
+          )}
+          <button className={`btn ${getButtonColor()}`} onClick={onConfirm}>
+            {confirmText}
           </button>
         </div>
       </div>
@@ -45,11 +67,48 @@ const AdminArticleForm = () => {
   const [articleId, setArticleId] = useState(null);
   const [initialLoad, setInitialLoad] = useState(false);
   
-  // Custom dialog states
+  // Dialog states
   const [showDeleteImageDialog, setShowDeleteImageDialog] = useState(false);
-  const [imageToDelete, setImageToDelete] = useState(null);
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showValidationDialog, setShowValidationDialog] = useState(false);
+  const [dialogConfig, setDialogConfig] = useState({
+    title: '',
+    message: '',
+    type: 'danger',
+    confirmText: 'OK'
+  });
+
+  const [imageToDelete, setImageToDelete] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Helper functions for showing dialogs
+  const showError = (message) => {
+    setDialogConfig({
+      title: 'Greška',
+      message,
+      type: 'danger',
+      confirmText: 'OK'
+    });
+    setShowErrorDialog(true);
+  };
+
+  const showSuccess = (message) => {
+    setSuccessMessage(message);
+    setShowSuccessDialog(true);
+  };
+
+  const showValidationError = (message) => {
+    setDialogConfig({
+      title: 'Obavezna polja',
+      message,
+      type: 'warning',
+      confirmText: 'U redu'
+    });
+    setShowValidationDialog(true);
+  };
 
   // Memoize loadCategories to prevent unnecessary re-renders
   const loadCategories = useCallback(async () => {
@@ -61,6 +120,7 @@ const AdminArticleForm = () => {
       }
     } catch (error) {
       console.error('Error loading categories:', error);
+      showError('Greška pri učitavanju kategorija');
     }
   }, [isEdit, formData.categoryId]);
 
@@ -85,7 +145,7 @@ const AdminArticleForm = () => {
       setInitialLoad(true);
     } catch (error) {
       console.error('Error loading article:', error);
-      alert('Greška pri učitavanju članka');
+      showError('Greška pri učitavanju članka');
     } finally {
       setLoading(false);
     }
@@ -96,7 +156,7 @@ const AdminArticleForm = () => {
     if (isEdit) {
       loadArticle();
     }
-  }, [isEdit, loadCategories, loadArticle]); // Fixed dependencies
+  }, [isEdit, loadCategories, loadArticle]);
 
   // Track form changes
   useEffect(() => {
@@ -119,17 +179,17 @@ const AdminArticleForm = () => {
     
     // Validate required fields
     if (!formData.title.trim()) {
-      alert('Naslov je obavezan');
+      showValidationError('Naslov je obavezno polje');
       return;
     }
     
     if (!formData.content.trim()) {
-      alert('Sadržaj je obavezan');
+      showValidationError('Sadržaj je obavezno polje');
       return;
     }
     
     if (!formData.categoryId) {
-      alert('Kategorija je obavezna');
+      showValidationError('Molimo odaberite kategoriju');
       return;
     }
 
@@ -139,19 +199,23 @@ const AdminArticleForm = () => {
       if (isEdit) {
         await articlesApi.update(id, formData);
         setHasUnsavedChanges(false);
-        alert('Članak je uspješno ažuriran');
+        showSuccess('Članak je uspješno ažuriran');
+        setTimeout(() => {
+          navigate('/admin/clanci');
+        }, 1500);
       } else {
         const response = await articlesApi.create(formData);
         const newArticleId = response.data.data.id;
         setArticleId(newArticleId);
         setHasUnsavedChanges(false);
-        alert('Članak je uspješno kreiran');
+        showSuccess('Članak je uspješno kreiran');
+        setTimeout(() => {
+          navigate('/admin/clanci');
+        }, 1500);
       }
-      
-      navigate('/admin/clanci');
     } catch (error) {
       console.error('Error saving article:', error);
-      alert('Greška pri čuvanju članka: ' + (error.response?.data?.message || error.message));
+      showError('Greška pri čuvanju članka: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -162,7 +226,7 @@ const AdminArticleForm = () => {
     if (files.length === 0) return;
 
     if (!articleId) {
-      alert('Molimo prvo sačuvajte članak prije dodavanja slika');
+      showError('Molimo prvo sačuvajte članak prije dodavanja slika');
       return;
     }
 
@@ -174,7 +238,7 @@ const AdminArticleForm = () => {
         return response.data.data;
       } catch (error) {
         console.error('Error uploading image:', error);
-        alert(`Greška pri učitavanju slike ${file.name}`);
+        showError(`Greška pri učitavanju slike ${file.name}`);
         return null;
       }
     });
@@ -183,8 +247,12 @@ const AdminArticleForm = () => {
       const uploadedImages = await Promise.all(uploadPromises);
       const validImages = uploadedImages.filter(img => img !== null);
       setImages(prev => [...prev, ...validImages]);
+      if (validImages.length > 0) {
+        showSuccess(`${validImages.length} slika je uspješno dodano`);
+      }
     } catch (error) {
       console.error('Error during image upload:', error);
+      showError('Greška pri učitavanju slika');
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -198,24 +266,36 @@ const AdminArticleForm = () => {
         ...img,
         isPrimary: img.id === imageId
       })));
+      showSuccess('Glavna slika je uspješno postavljena');
     } catch (error) {
       console.error('Error setting primary image:', error);
-      alert('Greška pri postavljanju glavne slike');
+      showError('Greška pri postavljanju glavne slike');
     }
   };
 
   const handleDeleteImageClick = (imageId) => {
+    const image = images.find(img => img.id === imageId);
+    if (!image) return;
+    
     setImageToDelete(imageId);
+    setDialogConfig({
+      title: 'Brisanje slike',
+      message: `Jeste li sigurni da želite obrisati sliku "${image.fileName}"?`,
+      type: 'warning'
+    });
     setShowDeleteImageDialog(true);
   };
 
   const confirmDeleteImage = async () => {
+    if (!imageToDelete) return;
+    
     try {
       await imagesApi.delete(imageToDelete);
       setImages(prev => prev.filter(img => img.id !== imageToDelete));
+      showSuccess('Slika je uspješno obrisana');
     } catch (error) {
       console.error('Error deleting image:', error);
-      alert('Greška pri brisanju slike');
+      showError('Greška pri brisanju slike');
     } finally {
       setShowDeleteImageDialog(false);
       setImageToDelete(null);
@@ -236,8 +316,9 @@ const AdminArticleForm = () => {
       {/* Delete Image Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteImageDialog}
-        title="Brisanje slike"
-        message="Jeste li sigurni da želite obrisati ovu sliku?"
+        title={dialogConfig.title}
+        message={dialogConfig.message}
+        type={dialogConfig.type}
         onConfirm={confirmDeleteImage}
         onCancel={() => {
           setShowDeleteImageDialog(false);
@@ -250,11 +331,48 @@ const AdminArticleForm = () => {
         isOpen={showUnsavedChangesDialog}
         title="Nesačuvane promjene"
         message="Imate nesačuvane promjene. Da li ste sigurni da želite napustiti stranicu?"
+        type="warning"
         onConfirm={() => {
           setShowUnsavedChangesDialog(false);
           navigate('/admin/clanci');
         }}
         onCancel={() => setShowUnsavedChangesDialog(false)}
+      />
+
+      {/* Error Dialog - Hide cancel for simple notifications */}
+      <ConfirmationDialog
+        isOpen={showErrorDialog}
+        title={dialogConfig.title}
+        message={dialogConfig.message}
+        type={dialogConfig.type}
+        confirmText={dialogConfig.confirmText}
+        onConfirm={() => setShowErrorDialog(false)}
+        onCancel={() => setShowErrorDialog(false)}
+        hideCancel={true}
+      />
+
+      {/* Success Dialog - Hide cancel for success messages */}
+      <ConfirmationDialog
+        isOpen={showSuccessDialog}
+        title="Uspjeh"
+        message={successMessage}
+        type="success"
+        confirmText="OK"
+        onConfirm={() => setShowSuccessDialog(false)}
+        onCancel={() => setShowSuccessDialog(false)}
+        hideCancel={true}
+      />
+
+      {/* Validation Dialog - Hide cancel for simple notifications */}
+      <ConfirmationDialog
+        isOpen={showValidationDialog}
+        title={dialogConfig.title}
+        message={dialogConfig.message}
+        type={dialogConfig.type}
+        confirmText={dialogConfig.confirmText}
+        onConfirm={() => setShowValidationDialog(false)}
+        onCancel={() => setShowValidationDialog(false)}
+        hideCancel={true}
       />
 
       <div>

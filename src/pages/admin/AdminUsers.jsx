@@ -1,45 +1,38 @@
 import { useState, useEffect } from 'react';
 import { usersApi } from '../../services/api';
-import { Plus, Edit, Trash2, UserCheck, UserX, Mail, User, Shield, Key } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-
-// Custom Confirmation Dialog Component
-const ConfirmationDialog = ({ isOpen, title, message, onConfirm, onCancel }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div className="modal-actions">
-          <button className="btn btn-secondary" onClick={onCancel}>
-            Otkaži
-          </button>
-          <button className="btn btn-danger" onClick={onConfirm}>
-            Potvrdi
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { Plus, Edit, Trash2, UserCheck, UserX, Mail, User, Shield, Key, Settings } from 'lucide-react';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 
 const AdminUsers = () => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     fullName: '',
     email: '',
+    role: 'Admin',
     isActive: true
   });
+
+  // Dialog states
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [dialogConfig, setDialogConfig] = useState({
+    title: '',
+    message: '',
+    type: 'danger'
+  });
+
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [userToToggle, setUserToToggle] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     loadUsers();
@@ -52,9 +45,24 @@ const AdminUsers = () => {
       setUsers(response.data.data);
     } catch (error) {
       console.error('Error loading users:', error);
+      showError('Greška pri učitavanju korisnika');
     } finally {
       setLoading(false);
     }
+  };
+
+  const showError = (message) => {
+    setDialogConfig({
+      title: 'Greška',
+      message,
+      type: 'danger'
+    });
+    setShowErrorDialog(true);
+  };
+
+  const showSuccess = (message) => {
+    setSuccessMessage(message);
+    setShowSuccessDialog(true);
   };
 
   const handleSubmit = async (e) => {
@@ -62,98 +70,87 @@ const AdminUsers = () => {
     
     try {
       if (editingUser) {
-        await usersApi.update(editingUser.id, {
+        const userData = {
           fullName: formData.fullName,
           email: formData.email,
           isActive: formData.isActive
-        });
-        alert('Admin je uspješno ažuriran');
+        };
+        
+        if (editingUser.id !== currentUser.id && formData.username !== editingUser.username) {
+          userData.username = formData.username;
+        }
+        
+        if (editingUser.id !== currentUser.id && formData.role !== editingUser.role) {
+          userData.role = formData.role;
+        }
+        
+        await usersApi.update(editingUser.id, userData);
+        showSuccess('Korisnik je uspješno ažuriran');
       } else {
-        await usersApi.create(formData);
-        alert('Admin je uspješno kreiran');
+        await usersApi.create({
+          username: formData.username,
+          password: formData.password,
+          fullName: formData.fullName,
+          email: formData.email,
+          role: formData.role
+        });
+        showSuccess(`${formData.role} je uspješno kreiran`);
       }
       
       setShowModal(false);
       setEditingUser(null);
-      setFormData({ username: '', password: '', fullName: '', email: '', isActive: true });
+      setFormData({ 
+        username: '', 
+        password: '', 
+        fullName: '', 
+        email: '', 
+        role: 'Admin', 
+        isActive: true 
+      });
       loadUsers();
     } catch (error) {
       console.error('Error saving user:', error);
-      alert(error.response?.data?.message || 'Greška pri čuvanju admina');
+      showError(error.response?.data?.message || 'Greška pri čuvanju korisnika');
     }
   };
 
-  // Check if current user can edit a specific user
   const canEditUser = (targetUser) => {
     if (!currentUser) return false;
     
-    // Owner can edit anyone (including other owners)
     if (currentUser.role === 'Owner') {
       return true;
     }
     
-    // Admin can only edit themselves and other admins (not owners)
     if (currentUser.role === 'Admin') {
-      // Admin cannot edit owners
-      if (targetUser.role === 'Owner') {
-        return false;
-      }
-      // Admin can edit themselves or other admins
-      return currentUser.id === targetUser.id || targetUser.role === 'Admin';
+      return currentUser.id === targetUser.id;
     }
     
     return false;
   };
 
-  // Check if current user can delete a specific user
   const canDeleteUser = (targetUser) => {
     if (!currentUser) return false;
     
-    // Cannot delete yourself
     if (currentUser.id === targetUser.id) {
       return false;
     }
     
-    // Owner can delete anyone except themselves
     if (currentUser.role === 'Owner') {
       return true;
-    }
-    
-    // Admin can only delete other admins (not owners)
-    if (currentUser.role === 'Admin') {
-      // Admin cannot delete owners
-      if (targetUser.role === 'Owner') {
-        return false;
-      }
-      // Admin can delete other admins
-      return targetUser.role === 'Admin';
     }
     
     return false;
   };
 
-  // Check if current user can toggle status of a specific user
   const canToggleStatus = (targetUser) => {
     if (!currentUser) return false;
     
-    // Cannot toggle your own status
     if (currentUser.id === targetUser.id) {
       return false;
     }
     
-    // Owner can toggle anyone's status except themselves
     if (currentUser.role === 'Owner') {
       return true;
-    }
-    
-    // Admin can only toggle other admins' status (not owners)
-    if (currentUser.role === 'Admin') {
-      // Admin cannot toggle owners' status
-      if (targetUser.role === 'Owner') {
-        return false;
-      }
-      // Admin can toggle other admins' status
-      return targetUser.role === 'Admin';
     }
     
     return false;
@@ -161,10 +158,10 @@ const AdminUsers = () => {
 
   const handleEdit = (user) => {
     if (!canEditUser(user)) {
-      if (user.role === 'Owner' && currentUser?.role !== 'Owner') {
-        alert('Samo Owner može uređivati Owner naloge');
-      } else if (user.role === 'Admin' && currentUser?.role === 'Admin' && currentUser.id !== user.id) {
-        alert('Admin može uređivati samo svoj profil');
+      if (currentUser?.role === 'Admin' && currentUser.id !== user.id) {
+        showError('Admin može uređivati samo svoj profil');
+      } else {
+        showError('Nemate dozvolu za uređivanje ovog korisnika');
       }
       return;
     }
@@ -174,7 +171,20 @@ const AdminUsers = () => {
       username: user.username,
       fullName: user.fullName,
       email: user.email,
+      role: user.role,
       isActive: user.isActive
+    });
+    setShowModal(true);
+  };
+
+  const handleEditCurrentUser = () => {
+    setEditingUser(currentUser);
+    setFormData({
+      username: currentUser.username,
+      fullName: currentUser.fullName,
+      email: currentUser.email,
+      role: currentUser.role,
+      isActive: currentUser.isActive
     });
     setShowModal(true);
   };
@@ -182,12 +192,10 @@ const AdminUsers = () => {
   const handleDeleteClick = (id, username) => {
     const user = users.find(u => u.id === id);
     if (!user || !canDeleteUser(user)) {
-      if (user?.role === 'Owner' && currentUser?.role !== 'Owner') {
-        alert('Samo Owner može brisati Owner naloge');
-      } else if (currentUser?.id === id) {
-        alert('Ne možete obrisati svoj nalog');
+      if (currentUser?.id === id) {
+        showError('Ne možete obrisati svoj nalog');
       } else {
-        alert('Nemate dozvolu za brisanje ovog korisnika');
+        showError('Nemate dozvolu za brisanje ovog korisnika');
       }
       return;
     }
@@ -202,35 +210,51 @@ const AdminUsers = () => {
     try {
       await usersApi.delete(userToDelete.id);
       loadUsers();
+      showSuccess('Korisnik je uspješno obrisan');
     } catch (error) {
-      alert('Greška pri brisanju admina');
+      showError('Greška pri brisanju korisnika');
     } finally {
       setShowDeleteDialog(false);
       setUserToDelete(null);
     }
   };
 
-  const toggleUserStatus = async (user) => {
+  const handleToggleStatusClick = (user) => {
     if (!canToggleStatus(user)) {
-      if (user.role === 'Owner' && currentUser?.role !== 'Owner') {
-        alert('Samo Owner može mijenjati status Owner naloga');
-      } else if (currentUser?.id === user.id) {
-        alert('Ne možete mijenjati status svog naloga');
+      if (currentUser?.id === user.id) {
+        showError('Ne možete mijenjati status svog naloga');
       } else {
-        alert('Nemate dozvolu za mijenjanje statusa ovog korisnika');
+        showError('Nemate dozvolu za mijenjanje statusa ovog korisnika');
       }
       return;
     }
 
+    setUserToToggle(user);
+    setDialogConfig({
+      title: user.isActive ? 'Deaktivacija korisnika' : 'Aktivacija korisnika',
+      message: `Jeste li sigurni da želite ${user.isActive ? 'deaktivirati' : 'aktivirati'} korisnika "${user.username}"?`,
+      type: 'warning'
+    });
+    setShowStatusDialog(true);
+  };
+
+  const confirmToggleStatus = async () => {
+    if (!userToToggle) return;
+    
     try {
-      await usersApi.update(user.id, {
-        fullName: user.fullName,
-        email: user.email,
-        isActive: !user.isActive
+      await usersApi.update(userToToggle.id, {
+        fullName: userToToggle.fullName,
+        email: userToToggle.email,
+        role: userToToggle.role,
+        isActive: !userToToggle.isActive
       });
       loadUsers();
+      showSuccess(`Status korisnika je uspješno ${userToToggle.isActive ? 'deaktiviran' : 'aktiviran'}`);
     } catch (error) {
-      alert('Greška pri ažuriranju statusa');
+      showError('Greška pri ažuriranju statusa');
+    } finally {
+      setShowStatusDialog(false);
+      setUserToToggle(null);
     }
   };
 
@@ -243,16 +267,14 @@ const AdminUsers = () => {
   };
 
   const getPermissionText = (user) => {
-    if (user.role === 'Owner' && currentUser?.role !== 'Owner') {
-      return 'Samo Owner može upravljati';
-    }
-    
-    if (user.role === 'Admin' && currentUser?.role === 'Admin' && currentUser.id !== user.id) {
+    if (currentUser?.role === 'Admin' && currentUser.id !== user.id) {
       return 'Samo pregled';
     }
     
     return null;
   };
+
+  const filteredUsers = users.filter(user => user.id !== currentUser?.id);
 
   if (loading) {
     return (
@@ -264,10 +286,11 @@ const AdminUsers = () => {
 
   return (
     <>
+      {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}
-        title="Brisanje admina"
-        message={`Jeste li sigurni da želite obrisati admina "${userToDelete?.username}"?`}
+        title="Brisanje korisnika"
+        message={`Jeste li sigurni da želite obrisati korisnika "${userToDelete?.username}"?`}
         onConfirm={confirmDelete}
         onCancel={() => {
           setShowDeleteDialog(false);
@@ -275,33 +298,83 @@ const AdminUsers = () => {
         }}
       />
 
+      {/* Status Toggle Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showStatusDialog}
+        title={dialogConfig.title}
+        message={dialogConfig.message}
+        type={dialogConfig.type}
+        onConfirm={confirmToggleStatus}
+        onCancel={() => {
+          setShowStatusDialog(false);
+          setUserToToggle(null);
+        }}
+      />
+
+      {/* Error Dialog */}
+      <ConfirmationDialog
+        isOpen={showErrorDialog}
+        title={dialogConfig.title}
+        message={dialogConfig.message}
+        type={dialogConfig.type}
+        confirmText="OK"
+        onConfirm={() => setShowErrorDialog(false)}
+        onCancel={() => setShowErrorDialog(false)}
+        hideCancel={true}
+      />
+
+      {/* Success Dialog */}
+      <ConfirmationDialog
+        isOpen={showSuccessDialog}
+        title="Uspjeh"
+        message={successMessage}
+        type="success"
+        confirmText="OK"
+        onConfirm={() => setShowSuccessDialog(false)}
+        onCancel={() => setShowSuccessDialog(false)}
+        hideCancel={true}
+      />
+
       <div>
         <div className="admin-header">
           <h1>Upravljanje adminima</h1>
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              // Check if current user can create new users
-              if (currentUser?.role === 'Admin') {
-                alert('Samo Owner može kreirati nove admine');
-                return;
-              }
-              
-              setEditingUser(null);
-              setFormData({ username: '', password: '', fullName: '', email: '', isActive: true });
-              setShowModal(true);
-            }}
-            disabled={currentUser?.role === 'Admin'}
-          >
-            <Plus size={18} />
-            <span className="desktop-only">Novi admin</span>
-            <span className="mobile-only">Dodaj</span>
-          </button>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button
+              className="btn btn-secondary"
+              onClick={handleEditCurrentUser}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <Settings size={18} />
+              <span className="desktop-only">Uredi svoj profil</span>
+              <span className="mobile-only">Moj profil</span>
+            </button>
+            
+            {currentUser?.role === 'Owner' && (
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setEditingUser(null);
+                  setFormData({ 
+                    username: '', 
+                    password: '', 
+                    fullName: '', 
+                    email: '', 
+                    role: 'Admin',
+                    isActive: true 
+                  });
+                  setShowModal(true);
+                }}
+              >
+                <Plus size={18} />
+                <span className="desktop-only">Novi admin</span>
+                <span className="mobile-only">Dodaj</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {users.length > 0 ? (
+        {filteredUsers.length > 0 ? (
           <>
-            {/* Desktop Table */}
             <div className="table-container desktop-only">
               <table className="table">
                 <thead>
@@ -315,7 +388,7 @@ const AdminUsers = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => {
+                  {filteredUsers.map((user) => {
                     const permissionText = getPermissionText(user);
                     const canEdit = canEditUser(user);
                     const canDelete = canDeleteUser(user);
@@ -327,15 +400,6 @@ const AdminUsers = () => {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <User size={16} color="var(--text-secondary)" />
                             <strong>{user.username}</strong>
-                            {currentUser?.id === user.id && (
-                              <span className="status-badge" style={{ 
-                                fontSize: '0.7rem',
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                color: '#3b82f6'
-                              }}>
-                                Ti
-                              </span>
-                            )}
                           </div>
                         </td>
                         <td>{user.fullName}</td>
@@ -387,7 +451,7 @@ const AdminUsers = () => {
                               {canToggle && (
                                 <button
                                   className="btn btn-secondary btn-sm"
-                                  onClick={() => toggleUserStatus(user)}
+                                  onClick={() => handleToggleStatusClick(user)}
                                   title={user.isActive ? 'Deaktiviraj' : 'Aktiviraj'}
                                 >
                                   {user.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
@@ -412,9 +476,8 @@ const AdminUsers = () => {
               </table>
             </div>
 
-            {/* Mobile Cards */}
             <div className="mobile-card-list">
-              {users.map((user) => {
+              {filteredUsers.map((user) => {
                 const permissionText = getPermissionText(user);
                 const canEdit = canEditUser(user);
                 const canDelete = canDeleteUser(user);
@@ -453,15 +516,6 @@ const AdminUsers = () => {
                             <Shield size={10} style={{ marginRight: '0.25rem' }} />
                             {user.role}
                           </span>
-                          {currentUser?.id === user.id && (
-                            <span className="status-badge" style={{ 
-                              fontSize: '0.6rem',
-                              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                              color: '#3b82f6'
-                            }}>
-                              Ti
-                            </span>
-                          )}
                         </div>
                         <h3 className="mobile-card-title">
                           <User size={14} style={{ marginRight: '0.5rem' }} />
@@ -489,7 +543,6 @@ const AdminUsers = () => {
                       </span>
                     </div>
 
-                    {/* Actions */}
                     {permissionText ? (
                       <div className="mobile-card-details">
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
@@ -505,7 +558,7 @@ const AdminUsers = () => {
                           </button>
                         )}
                         {canToggle && (
-                          <button className="btn btn-secondary" onClick={() => toggleUserStatus(user)}>
+                          <button className="btn btn-secondary" onClick={() => handleToggleStatusClick(user)}>
                             {user.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
                             {user.isActive ? 'Deaktiviraj' : 'Aktiviraj'}
                           </button>
@@ -529,28 +582,30 @@ const AdminUsers = () => {
         ) : (
           <div className="empty-state">
             <User size={48} color="var(--text-secondary)" />
-            <p style={{ color: 'var(--text-secondary)', margin: '1rem 0' }}>Nema admina za prikaz</p>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                if (currentUser?.role === 'Admin') {
-                  alert('Samo Owner može kreirati nove admine');
-                  return;
-                }
-                
-                setEditingUser(null);
-                setFormData({ username: '', password: '', fullName: '', email: '', isActive: true });
-                setShowModal(true);
-              }}
-              disabled={currentUser?.role === 'Admin'}
-            >
-              <Plus size={18} />
-              Dodaj prvog admina
-            </button>
+            <p style={{ color: 'var(--text-secondary)', margin: '1rem 0' }}>Nema drugih korisnika za prikaz</p>
+            {currentUser?.role === 'Owner' && (
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setEditingUser(null);
+                  setFormData({ 
+                    username: '', 
+                    password: '', 
+                    fullName: '', 
+                    email: '', 
+                    role: 'Admin',
+                    isActive: true 
+                  });
+                  setShowModal(true);
+                }}
+              >
+                <Plus size={18} />
+                Dodaj novog korisnika
+              </button>
+            )}
           </div>
         )}
 
-        {/* MODAL */}
         {showModal && (
           <div className="modal-overlay">
             <div className="modal-content" style={{ maxWidth: '500px' }}>
@@ -565,7 +620,7 @@ const AdminUsers = () => {
                 {editingUser ? (
                   <>
                     <Edit size={20} />
-                    Uredi admina
+                    {editingUser.id === currentUser?.id ? 'Uredi svoj profil' : 'Uredi korisnika'}
                   </>
                 ) : (
                   <>
@@ -576,12 +631,12 @@ const AdminUsers = () => {
               </h2>
 
               <form onSubmit={handleSubmit}>
-                {!editingUser && (
+                {(!editingUser || editingUser.id !== currentUser?.id) && (
                   <>
                     <div className="form-group">
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <User size={16} />
-                        Korisničko ime *
+                        Korisničko ime {!editingUser && '*'}
                       </label>
                       <input
                         type="text"
@@ -590,11 +645,19 @@ const AdminUsers = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, username: e.target.value })
                         }
-                        required
+                        required={!editingUser}
                         placeholder="unesite korisničko ime"
+                        disabled={editingUser?.id === currentUser?.id}
                       />
+                      {editingUser?.id === currentUser?.id && (
+                        <small className="text-muted">Korisničko ime se ne može mijenjati</small>
+                      )}
                     </div>
+                  </>
+                )}
 
+                {!editingUser && (
+                  <>
                     <div className="form-group">
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Key size={16} />
@@ -612,6 +675,43 @@ const AdminUsers = () => {
                       />
                     </div>
                   </>
+                )}
+
+                {(currentUser?.role === 'Owner' && editingUser?.id !== currentUser?.id) || !editingUser ? (
+                  <div className="form-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Shield size={16} />
+                      Rola *
+                    </label>
+                    <select
+                      className="form-control"
+                      value={formData.role}
+                      onChange={(e) =>
+                        setFormData({ ...formData, role: e.target.value })
+                      }
+                      required
+                    >
+                      <option value="Admin">Admin</option>
+                      <option value="Owner">Owner</option>
+                    </select>
+                    <small className="text-muted">
+                      Owner ima potpune privilegije, Admin može samo uređivati svoj profil
+                    </small>
+                  </div>
+                ) : (
+                  <div className="form-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Shield size={16} />
+                      Rola
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.role}
+                      disabled
+                    />
+                    <small className="text-muted">Rolu može mijenjati samo drugi Owner</small>
+                  </div>
                 )}
 
                 <div className="form-group">
@@ -645,7 +745,7 @@ const AdminUsers = () => {
                   />
                 </div>
 
-                {editingUser && (
+                {editingUser && editingUser.id !== currentUser?.id && currentUser?.role === 'Owner' && (
                   <div className="form-group">
                     <label
                       style={{
@@ -666,7 +766,7 @@ const AdminUsers = () => {
                       Aktivan nalog
                     </label>
                     <small className="text-muted">
-                      Ako je deaktiviran, admin se ne može prijaviti
+                      Ako je deaktiviran, korisnik se ne može prijaviti
                     </small>
                   </div>
                 )}
@@ -683,6 +783,7 @@ const AdminUsers = () => {
                         password: '',
                         fullName: '',
                         email: '',
+                        role: 'Admin',
                         isActive: true
                       });
                     }}
