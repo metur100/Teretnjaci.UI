@@ -1,3 +1,4 @@
+// api.js
 import axios from 'axios';
 
 const api = axios.create({
@@ -7,7 +8,6 @@ const api = axios.create({
   }
 });
 
-// Add authorization token if it exists
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token');
@@ -33,9 +33,7 @@ api.interceptors.response.use(
 
 export default api;
 
-// Articles API
 export const articlesApi = {
-  // Public API - only published articles
   getAll: (params) => {
     if (params) {
       const queryString = new URLSearchParams(params).toString();
@@ -44,7 +42,6 @@ export const articlesApi = {
     return api.get('/articles');
   },
   
-  // Admin API - all articles including drafts
   getAllAdmin: (params) => {
     if (params) {
       const queryString = new URLSearchParams(params).toString();
@@ -60,7 +57,6 @@ export const articlesApi = {
   delete: (id) => api.delete(`/articles/${id}`)
 };
 
-// Categories API
 export const categoriesApi = {
   getAll: () => api.get('/categories'),
   getBySlug: (slug) => api.get(`/categories/${slug}`)
@@ -85,7 +81,6 @@ export const imagesApi = {
     });
   },
   
-  // Upload image directly (for inline editor images)
   uploadInline: (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -107,7 +102,6 @@ export const imagesApi = {
   }
 };
 
-// Users API (Owner only)
 export const usersApi = {
   getAll: () => api.get('/users'),
   create: (data) => api.post('/users', data),
@@ -115,7 +109,6 @@ export const usersApi = {
   delete: (id) => api.delete(`/users/${id}`)
 };
 
-// Login API
 export const authApi = {
   login: (credentials) => api.post('/auth/login', credentials),
   getProfile: () => api.get('/auth/profile')

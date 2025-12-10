@@ -10,6 +10,7 @@ import AdminArticles from './pages/admin/AdminArticles';
 import AdminArticleForm from './pages/admin/AdminArticleForm';
 import AdminUsers from './pages/admin/AdminUsers';
 import ProtectedRoute from './components/ProtectedRoute';
+import CategoryPage from './pages/CategoryPage';
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
-            <Route path="kategorija/:slug" element={<Category />} />
+            <Route path="kategorija/:slug" element={<CategoryPage />} />
             <Route path="clanak/:slug" element={<ArticleDetail />} />
           </Route>
 
