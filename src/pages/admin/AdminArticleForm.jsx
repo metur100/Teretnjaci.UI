@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { articlesApi, categoriesApi, imagesApi } from "../../services/api";
-import { Save, ArrowLeft, Upload, X, Star, Info } from "lucide-react";
+import { Save, ArrowLeft, Upload, X, Star, Info, AlertCircle } from "lucide-react";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -73,7 +73,7 @@ const AdminArticleForm = () => {
     title: "",
     content: "",
     categoryId: "",
-    isPublished: true,
+    isPublished: false, // Default to draft
   });
 
   const [categories, setCategories] = useState([]);
@@ -82,6 +82,7 @@ const AdminArticleForm = () => {
   const [loading, setLoading] = useState(false);
   const [articleId, setArticleId] = useState(null);
   const [initialLoad, setInitialLoad] = useState(false);
+  const [isAutoSaved, setIsAutoSaved] = useState(false);
 
   // Dialog states
   const [showDeleteImageDialog, setShowDeleteImageDialog] = useState(false);
@@ -128,7 +129,49 @@ const AdminArticleForm = () => {
     setShowValidationDialog(true);
   };
 
-  // Image handler for Quill editor
+  // Auto-save article as draft (for image uploads before article creation)
+  const autoSaveArticle = async () => {
+    // Validate minimum requirements
+    if (!formData.title.trim()) {
+      showValidationError("Molimo unesite naslov članka prije dodavanja slika");
+      return null;
+    }
+
+    if (!formData.categoryId) {
+      showValidationError("Molimo odaberite kategoriju prije dodavanja slika");
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Create article as draft
+      const articleData = {
+        ...formData,
+        content: formData.content || '<p><br></p>', // Minimum content
+        isPublished: false // Always draft for auto-save
+      };
+
+      const response = await articlesApi.create(articleData);
+      const newArticleId = response.data.data.id;
+      
+      setArticleId(newArticleId);
+      setIsAutoSaved(true);
+      
+      console.log("Article auto-saved as draft with ID:", newArticleId);
+      
+      return newArticleId;
+    } catch (error) {
+      console.error("Error auto-saving article:", error);
+      const errorMessage = error.response?.data?.message || error.message || 'Nepoznata greška';
+      showError("Greška pri čuvanju članka: " + errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Image handler for Quill editor (inline images)
   const imageHandler = useCallback(() => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -156,7 +199,7 @@ const AdminArticleForm = () => {
       try {
         setUploading(true);
         
-        // Upload to ImgBB
+        // Upload to ImgBB (doesn't require articleId)
         const response = await imagesApi.uploadInline(file);
         
         if (response.data.success) {
@@ -168,7 +211,7 @@ const AdminArticleForm = () => {
           quill.insertEmbed(range.index, 'image', imageUrl);
           quill.setSelection(range.index + 1);
           
-          showSuccess('Slika je uspješno dodana');
+          showSuccess('Slika je uspješno dodana u sadržaj');
         } else {
           showError('Greška pri učitavanju slike');
         }
@@ -281,10 +324,10 @@ const AdminArticleForm = () => {
 
   // Track form changes
   useEffect(() => {
-    if (isEdit && initialLoad) {
+    if ((isEdit && initialLoad) || isAutoSaved) {
       setHasUnsavedChanges(true);
     }
-  }, [formData, isEdit, initialLoad]);
+  }, [formData, isEdit, initialLoad, isAutoSaved]);
 
   // Handle back navigation with unsaved changes warning
   const handleBackClick = () => {
@@ -318,19 +361,24 @@ const AdminArticleForm = () => {
     setLoading(true);
 
     try {
-      if (isEdit) {
-        await articlesApi.update(id, formData);
+      if (isEdit || isAutoSaved) {
+        // Update existing article
+        await articlesApi.update(articleId || id, formData);
         setHasUnsavedChanges(false);
         showSuccess("Članak je uspješno ažuriran");
         setTimeout(() => {
           navigate("/admin/clanci");
         }, 1500);
       } else {
+        // Create new article
         const response = await articlesApi.create(formData);
         const newArticleId = response.data.data.id;
         setArticleId(newArticleId);
         setHasUnsavedChanges(false);
         showSuccess("Članak je uspješno kreiran");
+        setTimeout(() => {
+          navigate("/admin/clanci");
+        }, 1500);
       }
     } catch (error) {
       console.error("Error saving article:", error);
@@ -346,9 +394,14 @@ const AdminArticleForm = () => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    if (!articleId) {
-      showError("Molimo prvo sačuvajte članak prije dodavanja slika");
-      return;
+    // If no articleId, auto-save article first
+    let currentArticleId = articleId;
+    if (!currentArticleId) {
+      currentArticleId = await autoSaveArticle();
+      if (!currentArticleId) {
+        e.target.value = "";
+        return; // Validation failed or error occurred
+      }
     }
 
     setUploading(true);
@@ -381,7 +434,7 @@ const AdminArticleForm = () => {
       setUploadProgress(Math.round((i / files.length) * 100));
       
       try {
-        const response = await imagesApi.upload(articleId, file);
+        const response = await imagesApi.upload(currentArticleId, file);
         if (response.data.success) {
           uploadedImages.push(response.data.data);
         } else {
@@ -526,10 +579,24 @@ const AdminArticleForm = () => {
       <div>
         <div className="admin-header">
           <h1>{isEdit ? "Uredi članak" : "Novi članak"}</h1>
-          <button className="btn btn-secondary" onClick={handleBackClick}>
-            <ArrowLeft size={18} />
-            Nazad
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            {isAutoSaved && !isEdit && (
+              <span style={{ 
+                fontSize: '0.875rem', 
+                color: 'var(--warning)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <AlertCircle size={16} />
+                Sačuvano kao nacrt
+              </span>
+            )}
+            <button className="btn btn-secondary" onClick={handleBackClick}>
+              <ArrowLeft size={18} />
+              Nazad
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -545,6 +612,7 @@ const AdminArticleForm = () => {
                 }
                 required
                 disabled={loading}
+                placeholder="Unesite naslov članka..."
               />
             </div>
 
@@ -583,6 +651,17 @@ const AdminArticleForm = () => {
                   </span>
                 )}
               </label>
+              <div style={{ 
+                marginBottom: '0.5rem', 
+                padding: '0.75rem', 
+                background: 'var(--bg-secondary)', 
+                borderRadius: '0.5rem',
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary)'
+              }}>
+                <Info size={14} style={{ display: 'inline', marginRight: '0.5rem' }} />
+                Kliknite na dugme slike u toolbaru ili paste slike direktno u editor
+              </div>
               <ReactQuill
                 ref={quillRef}
                 theme="snow"
@@ -590,13 +669,146 @@ const AdminArticleForm = () => {
                 onChange={(content) => setFormData({ ...formData, content })}
                 modules={modules}
                 formats={formats}
-                placeholder="Počnite pisati sadržaj članka... Možete paste slike direktno ili koristiti dugme za dodavanje slika."
+                placeholder="Počnite pisati sadržaj članka... Možete dodati slike koristeći dugme za slike u toolbaru ili ih paste direktno."
                 style={{
                   height: '500px',
                   marginBottom: '3rem'
                 }}
                 readOnly={loading}
               />
+            </div>
+
+            {/* Featured Images Section - Now always visible */}
+            <div className="form-group">
+              <label>Istaknute slike (za galeriju)</label>
+              <div
+                style={{
+                  padding: '1rem',
+                  background: 'var(--bg-secondary)',
+                  borderRadius: '0.5rem',
+                  marginBottom: '1rem',
+                }}
+              >
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  <Info size={14} style={{ display: 'inline', marginRight: '0.5rem' }} />
+                  {!articleId && !isEdit ? (
+                    <>Ove slike će se prikazati u galeriji. Članak će biti automatski sačuvan kao nacrt kada dodate prvu sliku.</>
+                  ) : (
+                    <>Ove slike će se prikazati u galeriji na detaljnoj stranici članka.</>
+                  )}
+                </p>
+              </div>
+              
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
+                  marginBottom: "1rem",
+                  flexWrap: "wrap",
+                }}
+              >
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  multiple
+                  onChange={handleImageUpload}
+                  disabled={uploading || loading}
+                  style={{ display: "none" }}
+                  id="featured-image-upload"
+                />
+                <label
+                  htmlFor="featured-image-upload"
+                  className={`btn ${
+                    uploading ? "btn-disabled" : "btn-secondary"
+                  }`}
+                  style={{
+                    cursor: uploading ? "not-allowed" : "pointer",
+                    margin: 0,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <Upload size={18} />
+                  {uploading ? "Učitavanje..." : "Dodaj istaknute slike"}
+                </label>
+                <span
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  Maksimalno 10MB po slici
+                </span>
+                
+                {uploading && uploadProgress > 0 && (
+                  <div style={{ 
+                    flex: 1,
+                    minWidth: "200px",
+                    background: "var(--bg-secondary)",
+                    borderRadius: "4px",
+                    height: "8px",
+                    overflow: "hidden"
+                  }}>
+                    <div 
+                      style={{ 
+                        width: `${uploadProgress}%`,
+                        height: "100%",
+                        background: "linear-gradient(90deg, var(--primary), var(--accent))",
+                        transition: "width 0.3s ease",
+                        borderRadius: "4px"
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {images.length > 0 && (
+                <div className="image-grid">
+                  {images.map((image) => (
+                    <div key={image.id} className="image-preview">
+                      <img
+                        src={image.url}
+                        alt={image.fileName}
+                        className="image-thumbnail"
+                        onError={(e) => {
+                          console.error("Image load error:", image.url);
+                          e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESlika nije dostupna%3C/text%3E%3C/svg%3E";
+                        }}
+                        loading="lazy"
+                      />
+                      {image.isPrimary && (
+                        <div className="primary-badge">
+                          <Star size={12} />
+                          Glavna
+                        </div>
+                      )}
+                      <div className="image-actions">
+                        {!image.isPrimary && (
+                          <button
+                            type="button"
+                            onClick={() => handleSetPrimary(image.id)}
+                            className="image-action-btn"
+                            title="Postavi kao glavnu sliku"
+                            disabled={loading}
+                          >
+                            <Star size={14} />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteImageClick(image.id)}
+                          className="image-action-btn delete"
+                          disabled={loading}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -619,142 +831,10 @@ const AdminArticleForm = () => {
                 Objavi odmah
               </label>
               <small className="text-muted">
-                Ako je označeno, članak će biti javno dostupan odmah nakon
-                čuvanja.
+                Ako je označeno, članak će biti javno dostupan odmah nakon čuvanja.
+                {isAutoSaved && " Članak je trenutno sačuvan kao nacrt."}
               </small>
             </div>
-
-            {/* Featured Images Section */}
-            {articleId && (
-              <div className="form-group">
-                <label>Istaknute slike (za galeriju)</label>
-                <div
-                  style={{
-                    padding: '1rem',
-                    background: 'var(--bg-secondary)',
-                    borderRadius: '0.5rem',
-                    marginBottom: '1rem',
-                  }}
-                >
-                  <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    <Info size={14} style={{ display: 'inline', marginRight: '0.5rem' }} />
-                    Ove slike će se prikazati u galeriji na detaljnoj stranici članka. 
-                    Za slike unutar sadržaja koristite editor iznad.
-                  </p>
-                </div>
-                
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "1rem",
-                    marginBottom: "1rem",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                    multiple
-                    onChange={handleImageUpload}
-                    disabled={uploading || loading}
-                    style={{ display: "none" }}
-                    id="featured-image-upload"
-                  />
-                  <label
-                    htmlFor="featured-image-upload"
-                    className={`btn ${
-                      uploading ? "btn-disabled" : "btn-secondary"
-                    }`}
-                    style={{
-                      cursor: uploading ? "not-allowed" : "pointer",
-                      margin: 0,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <Upload size={18} />
-                    {uploading ? "Učitavanje..." : "Dodaj istaknute slike"}
-                  </label>
-                  <span
-                    style={{
-                      fontSize: "0.875rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    Maksimalno 10MB po slici
-                  </span>
-                  
-                  {uploading && uploadProgress > 0 && (
-                    <div style={{ 
-                      flex: 1,
-                      minWidth: "200px",
-                      background: "var(--bg-secondary)",
-                      borderRadius: "4px",
-                      height: "8px",
-                      overflow: "hidden"
-                    }}>
-                      <div 
-                        style={{ 
-                          width: `${uploadProgress}%`,
-                          height: "100%",
-                          background: "linear-gradient(90deg, var(--primary), var(--accent))",
-                          transition: "width 0.3s ease",
-                          borderRadius: "4px"
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {images.length > 0 && (
-                  <div className="image-grid">
-                    {images.map((image) => (
-                      <div key={image.id} className="image-preview">
-                        <img
-                          src={image.url}
-                          alt={image.fileName}
-                          className="image-thumbnail"
-                          onError={(e) => {
-                            console.error("Image load error:", image.url);
-                            e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESlika nije dostupna%3C/text%3E%3C/svg%3E";
-                          }}
-                          loading="lazy"
-                        />
-                        {image.isPrimary && (
-                          <div className="primary-badge">
-                            <Star size={12} />
-                            Glavna
-                          </div>
-                        )}
-                        <div className="image-actions">
-                          {!image.isPrimary && (
-                            <button
-                              type="button"
-                              onClick={() => handleSetPrimary(image.id)}
-                              className="image-action-btn"
-                              title="Postavi kao glavnu sliku"
-                              disabled={loading}
-                            >
-                              <Star size={14} />
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteImageClick(image.id)}
-                            className="image-action-btn delete"
-                            disabled={loading}
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
 
             <div className="form-actions">
               <button
@@ -763,7 +843,7 @@ const AdminArticleForm = () => {
                 disabled={loading || categories.length === 0}
               >
                 <Save size={18} />
-                {loading ? "Čuvanje..." : isEdit ? "Ažuriraj" : "Sačuvaj"}
+                {loading ? "Čuvanje..." : (isEdit || isAutoSaved) ? "Ažuriraj" : "Sačuvaj"}
               </button>
               <button
                 type="button"
@@ -771,7 +851,7 @@ const AdminArticleForm = () => {
                 onClick={handleBackClick}
                 disabled={loading}
               >
-                {isEdit ? "Nazad" : "Otkaži"}
+                Otkaži
               </button>
             </div>
           </div>
