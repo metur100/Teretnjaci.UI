@@ -5,6 +5,7 @@ import ArticleCard from '../components/ArticleCard';
 import { Eye, Calendar, User, TrendingUp, Clock, Facebook, Instagram, Sparkles, Flame, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
+import sponzorImg from '../images/sponzor.jpg';
 
 const Home = () => {
   const [searchParams] = useSearchParams();
@@ -447,15 +448,15 @@ const Home = () => {
                     borderRadius: '0.5rem', 
                     marginBottom: '1rem' 
                   }}>
-                    <img
-                      src="./images/sponzor.jpg"
-                      alt="Sponzor"
-                      style={{
-                        width: '100%',
-                        height: 'auto',
-                        borderRadius: '0.5rem',
-                        transition: 'transform 0.5s ease'
-                      }}
+<img
+  src={sponzorImg}
+  alt="Sponzor"
+  style={{
+    width: '100%',
+    height: 'auto',
+    borderRadius: '0.5rem',
+    transition: 'transform 0.5s ease'
+  }}
                       onError={(e) => {
                         e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="150"%3E%3Cdefs%3E%3ClinearGradient id="sponsorGrad" x1="0%" y1="0%" x2="100%" y2="100%"%3E%3Cstop offset="0%" stop-color="%234a5568"/%3E%3Cstop offset="100%" stop-color="%232d3748"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="300" height="150" fill="url(%23sponsorGrad)"/%3E%3Ctext fill="%23cbd5e1" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" x="150" y="75"%3ESponzor Teretnjaci.ba%3C/text%3E%3C/svg%3E';
                       }}
