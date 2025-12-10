@@ -6,7 +6,7 @@ const ConfirmationDialog = ({
   confirmText = "Potvrdi", 
   cancelText = "Otkaži",
   type = "danger",
-  hideCancel = false, // Add this prop
+  hideCancel = false,
   onConfirm, 
   onCancel 
 }) => {

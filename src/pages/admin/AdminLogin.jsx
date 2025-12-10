@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Truck, LogIn } from 'lucide-react';
 
@@ -8,8 +8,22 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const location = useLocation();
+  const { login, user } = useAuth();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    if (user) {
+      // Get the redirect path from location state or default to admin dashboard
+      const from = location.state?.from?.pathname || '/admin';
+      navigate(from, { replace: true });
+    } else {
+      setCheckingAuth(false);
+    }
+  }, [user, navigate, location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,13 +33,48 @@ const AdminLogin = () => {
     const result = await login(username, password);
     
     if (result.success) {
-      navigate('/admin');
+      // The useEffect will handle redirect when user state updates
     } else {
       setError(result.message);
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
+
+  // Show loading while checking auth status
+  if (checkingAuth) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+        background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)'
+      }}>
+        <div style={{
+          maxWidth: '400px',
+          width: '100%',
+          backgroundColor: 'var(--bg-secondary)',
+          padding: '2rem',
+          borderRadius: '1rem',
+          border: '1px solid var(--border)',
+          boxShadow: '0 20px 60px var(--shadow)',
+          textAlign: 'center'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+            <Truck size={48} color="var(--primary)" />
+          </div>
+          <div className="spinner" style={{ margin: '1rem auto' }}></div>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>Provjera autentikacije...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render login form if user exists (though useEffect should redirect)
+  if (user) {
+    return null;
+  }
 
   return (
     <div style={{
@@ -77,6 +126,7 @@ const AdminLogin = () => {
               onChange={(e) => setUsername(e.target.value)}
               required
               autoFocus
+              disabled={loading}
             />
           </div>
 
@@ -88,6 +138,7 @@ const AdminLogin = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
@@ -97,8 +148,17 @@ const AdminLogin = () => {
             disabled={loading}
             style={{ width: '100%', justifyContent: 'center' }}
           >
-            <LogIn size={18} />
-            {loading ? 'Prijava...' : 'Prijavite se'}
+            {loading ? (
+              <>
+                <div className="spinner-small" style={{ marginRight: '0.5rem' }}></div>
+                Prijava...
+              </>
+            ) : (
+              <>
+                <LogIn size={18} />
+                Prijavite se
+              </>
+            )}
           </button>
         </form>
 
