@@ -66,19 +66,45 @@ export const categoriesApi = {
   getBySlug: (slug) => api.get(`/categories/${slug}`)
 };
 
-// Images API
 export const imagesApi = {
   upload: (articleId, file) => {
     const formData = new FormData();
     formData.append('file', file);
+    
     return api.post(`/images/upload/${articleId}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 30000,
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        console.log(`Upload progress: ${percentCompleted}%`);
+      },
     });
   },
-  setPrimary: (id) => api.put(`/images/${id}/set-primary`),
-  delete: (id) => api.delete(`/images/${id}`)
+  
+  // Upload image directly (for inline editor images)
+  uploadInline: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return api.post('/images/upload-inline', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 30000,
+    });
+  },
+  
+  setPrimary: (imageId) => {
+    return api.put(`/images/${imageId}/set-primary`);
+  },
+  
+  delete: (imageId) => {
+    return api.delete(`/images/${imageId}`);
+  }
 };
 
 // Users API (Owner only)

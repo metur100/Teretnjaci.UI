@@ -3,12 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { articlesApi } from '../services/api';
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
-import { Eye, Calendar, User, AlertTriangle, Clock, ArrowLeft } from 'lucide-react';
+import { Eye, Calendar, User, AlertTriangle, Clock, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 
 const ArticleDetail = () => {
   const { slug } = useParams();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [imageError, setImageError] = useState({});
 
   useEffect(() => {
     loadArticle();
@@ -24,6 +25,10 @@ const ArticleDetail = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImageError = (imageId) => {
+    setImageError(prev => ({ ...prev, [imageId]: true }));
   };
 
   const getBadgeClass = (category) => {
@@ -97,26 +102,39 @@ const ArticleDetail = () => {
         </div>
       </div>
 
+      {/* Featured Images Gallery */}
       {article.images && article.images.length > 0 && (
         <div className="article-images">
           {article.images.map((image) => (
-            <img
-              key={image.id}
-              src={image.url}
-              alt={image.fileName}
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
+            <div key={image.id} className="article-image-container">
+              {!imageError[image.id] ? (
+                <img
+                  src={image.url}
+                  alt={image.fileName}
+                  className="article-image"
+                  onError={() => handleImageError(image.id)}
+                  loading="lazy"
+                />
+              ) : (
+                <div className="image-error">
+                  <ImageIcon size={48} />
+                  <p>Slika nije dostupna</p>
+                </div>
+              )}
+              {image.isPrimary && (
+                <div className="image-caption">
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}
 
-      <div className="article-body">
-        {article.content.split('\n').map((paragraph, index) => (
-          paragraph.trim() && <p key={index}>{paragraph}</p>
-        ))}
-      </div>
+      {/* Article Content - Render as HTML */}
+      <div 
+        className="article-body article-content-html"
+        dangerouslySetInnerHTML={{ __html: article.content }}
+      />
 
       <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border)' }}>
         <Link to="/" className="btn btn-secondary">
