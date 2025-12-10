@@ -72,7 +72,6 @@ const AdminArticleForm = () => {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    summary: "",
     categoryId: "",
     isPublished: true,
   });
@@ -251,7 +250,6 @@ const AdminArticleForm = () => {
       setFormData({
         title: article.title || "",
         content: article.content || "",
-        summary: article.summary || "",
         categoryId: article.categoryId || "",
         isPublished: article.isPublished || false,
       });
@@ -574,20 +572,6 @@ const AdminArticleForm = () => {
                   </>
                 )}
               </select>
-            </div>
-
-            <div className="form-group">
-              <label>Sažetak (opcionalno)</label>
-              <textarea
-                className="form-control"
-                value={formData.summary}
-                onChange={(e) =>
-                  setFormData({ ...formData, summary: e.target.value })
-                }
-                rows="3"
-                placeholder="Kratak sažetak članka koji će se prikazati na listi članaka..."
-                disabled={loading}
-              />
             </div>
 
             <div className="form-group">
