@@ -454,7 +454,7 @@ const AdminArticleForm = () => {
 
     setUploading(false);
     setUploadProgress(100);
-    setTimeout(() => setUploadProgress(0), 1000);
+    setTimeout(() => setUploadProgress(0), 3000);
     e.target.value = "";
   };
 

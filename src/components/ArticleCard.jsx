@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { bs } from 'date-fns/locale';
-import { Eye, Calendar, TrendingUp, Clock, AlertTriangle } from 'lucide-react';
+import { Eye, Calendar, Clock, AlertTriangle } from 'lucide-react';
 
 const ArticleCard = ({ article }) => {
   const navigate = useNavigate();

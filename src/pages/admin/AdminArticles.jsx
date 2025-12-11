@@ -145,16 +145,6 @@ const AdminArticles = () => {
   </button>
         </div>
 
-        {/* Mobile Filter Button */}
-        <button
-          className="btn btn-secondary mobile-only"
-          onClick={() => setShowMobileFilters(!showMobileFilters)}
-          style={{ marginBottom: '1rem', width: '100%' }}
-        >
-          <Filter size={18} />
-          Filtriraj: {filter === 'all' ? 'Svi' : filter === 'published' ? 'Objavljeni' : 'Draftovi'}
-        </button>
-
         {/* Filter Tabs - Desktop */}
         <div className="filter-tabs desktop-only" style={{ marginBottom: '2rem' }}>
           <button

@@ -1,11 +1,14 @@
+// Header.jsx
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Truck, Search, Home, Newspaper, Navigation, AlertTriangle, HelpCircle, FileText } from 'lucide-react';
+import { Truck, Search, Home, Newspaper, Navigation, AlertTriangle, FileText, Moon, Sun } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -64,15 +67,26 @@ const Header = () => {
               </Link>
             </nav>
 
-            <form onSubmit={handleSearch} className="search-bar">
-              <Search size={18} />
-              <input
-                type="text"
-                placeholder="Pretraži vijesti..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </form>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <form onSubmit={handleSearch} className="search-bar">
+                <Search size={18} />
+                <input
+                  type="text"
+                  placeholder="Pretraži vijesti..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </form>
+
+              <button
+                onClick={toggleTheme}
+                className="theme-toggle"
+                aria-label="Toggle theme"
+                title={theme === 'dark' ? 'Prebaci na svijetli režim' : 'Prebaci na tamni režim'}
+              >
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+            </div>
           </div>
         </div>
       </header>

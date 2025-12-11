@@ -1,7 +1,8 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Truck, FileText, Users, LogOut, Home, Menu, X, Settings } from 'lucide-react';
+import { Truck, FileText, Users, LogOut, Home, Menu, X, Settings, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 const AdminDashboard = () => {
   const { user, logout, isOwner } = useAuth();
@@ -9,6 +10,7 @@ const AdminDashboard = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   // Check screen size
   useEffect(() => {
@@ -135,6 +137,28 @@ const AdminDashboard = () => {
             </Link>
           )}
         </nav>
+
+                <div style={{ 
+          padding: '1rem 0',
+          borderTop: '1px solid var(--border)',
+          borderBottom: '1px solid var(--border)',
+          marginTop: 'auto'
+        }}>
+          <button
+            onClick={toggleTheme}
+            className="btn btn-secondary"
+            style={{ 
+              width: '100%',
+              justifyContent: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <span>{theme === 'dark' ? 'Svijetli režim' : 'Tamni režim'}</span>
+          </button>
+        </div>
 
         {/* Logout Button */}
         <div className="sidebar-footer">
