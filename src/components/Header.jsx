@@ -1,7 +1,7 @@
 // Header.jsx
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Home, Newspaper, Navigation, AlertTriangle, FileText, Moon, Sun } from 'lucide-react';
+import { Search, Home, Newspaper, Navigation, AlertTriangle, FileText, Moon, Sun, Lock } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import logo from '../images/teretnjaci.png';
 
@@ -76,7 +76,7 @@ const Header = () => {
                 <Search size={18} />
                 <input
                   type="text"
-                  placeholder="Pretraži vijesti..."
+                  placeholder="Pretraži..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -90,6 +90,17 @@ const Header = () => {
               >
                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
               </button>
+              
+              {/* Admin Login Icon - Added */}
+              <Link 
+                to="/admin/login" 
+                className="theme-toggle"
+                aria-label="Admin login"
+                title="Admin login"
+                style={{ textDecoration: 'none' }}
+              >
+                <Lock size={20} />
+              </Link>
             </div>
           </div>
         </div>
@@ -129,6 +140,15 @@ const Header = () => {
           >
             <FileText />
             <span>Oglasi</span>
+          </Link>
+          {/* Admin Login Icon in Mobile Navigation - Added */}
+          <Link 
+            to="/admin/login" 
+            className={location.pathname.includes('/admin') ? 'active' : ''}
+            aria-label="Admin login"
+          >
+            <Lock size={20} />
+            <span>Admin</span>
           </Link>
         </div>
       </nav>

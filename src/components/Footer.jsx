@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="footer-content">
           <div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              © 2024 Teretnjaci.ba • Portal za kamionske vozače
+              © 2025 Teretnjaci.ba
             </p>
           </div>
           <nav className="footer-links">
@@ -16,7 +16,6 @@ const Footer = () => {
             <Link to="/kategorija/dojave">Dojave</Link>
             <Link to="/kategorija/pomoc">Pomoć</Link>
             <Link to="/kategorija/oglasi">Oglasi</Link>
-            <Link to="/admin/login">Admin</Link>
           </nav>
         </div>
       </div>

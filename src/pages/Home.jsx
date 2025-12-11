@@ -339,6 +339,7 @@ const Home = () => {
                 <h2 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   {category.slug === 'saobracaj' && <AlertTriangle size={24} style={{ color: '#ff6b6b' }} />}
                   {category.slug === 'pomoc' && <Heart size={24} style={{ color: '#ff6b6b' }} />}
+                  
                   {category.name}
                 </h2>
                 <button

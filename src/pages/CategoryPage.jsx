@@ -1,4 +1,4 @@
-// CategoryPage.jsx
+// CategoryPage.jsx - Fixed version
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
@@ -7,8 +7,12 @@ import {
   AlertTriangle,
   Heart,
   TrendingUp,
+  Newspaper,
+  FileText,
+  MessageSquare,
   ChevronLeft,
   ChevronRight,
+  Megaphone,
 } from "lucide-react";
 
 const CategoryPage = () => {
@@ -18,6 +22,7 @@ const CategoryPage = () => {
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalArticles, setTotalArticles] = useState(0);
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = 12;
@@ -46,11 +51,10 @@ const CategoryPage = () => {
       const paginationData = response.data.pagination || {};
 
       setArticles(Array.isArray(responseData) ? responseData : []);
+      setTotalArticles(paginationData.totalItems || responseData.length);
       setTotalPages(
         paginationData.totalPages ||
-          Math.ceil(
-            (paginationData.totalItems || responseData.length) / pageSize
-          ) ||
+          Math.ceil((paginationData.totalItems || responseData.length) / pageSize) ||
           1
       );
     } catch (error) {
@@ -71,14 +75,18 @@ const CategoryPage = () => {
     if (!category) return null;
 
     switch (category.slug.toLowerCase()) {
+      case "vijesti":
+        return <Newspaper size={32} style={{ color: "var(--primary)" }} />;
       case "saobracaj":
         return <AlertTriangle size={32} style={{ color: "#ff6b6b" }} />;
       case "pomoc":
-        return <Heart size={32} style={{ color: "#ff6b6b" }} />;
+        return <Heart size={32} style={{ color: "#4ecdc4" }} />;
       case "dojave":
-        return <TrendingUp size={32} style={{ color: "#ff6b6b" }} />;
+        return <Megaphone size={32} style={{ color: "#ffd166" }} />;
+      case "oglasi":
+        return <FileText size={32} style={{ color: "#06d6a0" }} />;
       default:
-        return null;
+        return <Newspaper size={32} style={{ color: "var(--text-secondary)" }} />;
     }
   };
 
@@ -87,15 +95,17 @@ const CategoryPage = () => {
 
     switch (category.slug.toLowerCase()) {
       case "saobracaj":
-        return "Informacije o saobraćajnoj situaciji, zatvaranjima puteva i važnim dojavama za vozače.";
+        return "Aktuelne informacije o saobraćajnoj situaciji, zatvaranjima puteva, radovima na putevima i važnim dojavama za vozače teretnih vozila.";
       case "pomoc":
-        return "Potrebna pomoć ili želite pomoći? Ovdje možete pronaći sve relevantne informacije.";
+        return "Potrebna Vam je pomoć na putu ili želite pomoći drugima? Ovdje možete pronaći sve relevantne informacije, kontakte i objave za pomoć u nevolji.";
       case "dojave":
-        return "Najnovije dojave i važne informacije iz svijeta teretnog transporta.";
+        return "Najnovije dojave iz terena, informacije o kontrolama, graničnim prelazima i važne obavijesti za vozače teretnjaka.";
       case "vijesti":
-        return "Sve vijesti i aktuelnosti iz svijeta transporta i logistike.";
+        return "Sve aktuelne vijesti iz svijeta transporta, logistike, zakonskih promjena i događaja od značaja za teretni transport.";
+      case "oglasi":
+        return "Oglasi za prodaju i kupovinu teretnih vozila, traženje posla, transportnih usluga i sve ostalo što se tiče teretnog transporta.";
       default:
-        return `Svi članci iz kategorije ${category.name}`;
+        return `Svi članci i objave iz kategorije ${category.name}`;
     }
   };
 
@@ -122,6 +132,9 @@ const CategoryPage = () => {
     );
   }
 
+  const startArticle = (currentPage - 1) * pageSize + 1;
+  const endArticle = Math.min(currentPage * pageSize, totalArticles);
+
   return (
     <div className="fade-in-up">
       <section
@@ -147,11 +160,8 @@ const CategoryPage = () => {
               style={{
                 fontSize: "2.5rem",
                 margin: 0,
-                background:
-                  "linear-gradient(135deg, var(--primary), var(--accent))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                color: "var(--text-primary)",
+                fontWeight: 700,
               }}
             >
               {category.name}
@@ -175,18 +185,19 @@ const CategoryPage = () => {
               borderRadius: "0.5rem",
               display: "inline-block",
               border: "1px solid var(--border)",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
             }}
           >
             <span style={{ color: "var(--text-secondary)" }}>
-              Ukupno članaka:{" "}
-              <strong style={{ color: "var(--text-primary)" }}>
-                {articles.length > 0
-                  ? `${(currentPage - 1) * pageSize + 1}-${Math.min(
-                      currentPage * pageSize,
-                      (currentPage - 1) * pageSize + articles.length
-                    )}`
-                  : "0"}
-              </strong>
+              Prikazano:{" "}
+              <strong style={{ color: "var(--primary)" }}>
+                {articles.length > 0 ? `${startArticle}-${endArticle}` : "0"}
+              </strong>{" "}
+              od{" "}
+              <strong style={{ color: "var(--primary)" }}>
+                {totalArticles}
+              </strong>{" "}
+              članaka
             </span>
           </div>
         </div>
@@ -207,7 +218,7 @@ const CategoryPage = () => {
                   </div>
                 ))}
               </div>
-              // CategoryPage.jsx - Updated Pagination Section
+
               {totalPages > 1 && (
                 <div className="pagination-wrapper">
                   <div className="pagination-container">
@@ -225,8 +236,6 @@ const CategoryPage = () => {
                     <div className="page-numbers">
                       {[...Array(totalPages)].map((_, index) => {
                         const pageNum = index + 1;
-
-                        // Show first page, last page, current page, and pages around current page
                         const showPage =
                           totalPages <= 7 ||
                           pageNum === 1 ||
