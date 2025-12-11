@@ -245,54 +245,7 @@ const Home = () => {
         </div>
       </section>
 
-      {!searchQuery && popularArticles.length > 0 && (
-        <section className="articles-section fade-in-up" style={{ 
-          background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(74, 85, 104, 0.1) 100%)',
-          padding: '4rem 0',
-          margin: '3rem 0',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '-50%',
-            right: '-10%',
-            width: '300px',
-            height: '300px',
-            background: 'radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%)',
-            borderRadius: '50%'
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: '-30%',
-            left: '-10%',
-            width: '200px',
-            height: '200px',
-            background: 'radial-gradient(circle, rgba(78, 205, 196, 0.1) 0%, transparent 70%)',
-            borderRadius: '50%'
-          }} />
-          <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-            <div className="section-header">
-              <h2 className="section-title">
-                <Flame size={24} style={{ marginRight: '0.5rem', display: 'inline-block', verticalAlign: 'middle', color: '#ff6b6b' }} />
-                Popularno
-              </h2>
-            </div>
-            <div className="articles-grid">
-              {popularArticles.map((article, index) => (
-                <div 
-                  key={article.id} 
-                  className="hover-lift"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <ArticleCard article={article} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
+      
       {!searchQuery && (
         <section className="fade-in-up" style={{ 
           background: 'linear-gradient(135deg, rgba(24, 119, 242, 0.05) 0%, rgba(188, 24, 136, 0.05) 100%)',
@@ -521,6 +474,54 @@ const Home = () => {
         </section>
       )}
 
+      {!searchQuery && popularArticles.length > 0 && (
+        <section className="articles-section fade-in-up" style={{ 
+          background: 'linear-gradient(135deg, var(--bg-secondary) 0%, rgba(74, 85, 104, 0.1) 100%)',
+          padding: '4rem 0',
+          margin: '3rem 0',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-10%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%)',
+            borderRadius: '50%'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '-30%',
+            left: '-10%',
+            width: '200px',
+            height: '200px',
+            background: 'radial-gradient(circle, rgba(78, 205, 196, 0.1) 0%, transparent 70%)',
+            borderRadius: '50%'
+          }} />
+          <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+            <div className="section-header">
+              <h2 className="section-title">
+                <Flame size={24} style={{ marginRight: '0.5rem', display: 'inline-block', verticalAlign: 'middle', color: '#ff6b6b' }} />
+                Popularno
+              </h2>
+            </div>
+            <div className="articles-grid">
+              {popularArticles.map((article, index) => (
+                <div 
+                  key={article.id} 
+                  className="hover-lift"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <ArticleCard article={article} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      
       {!searchQuery && (
         <section className="fade-in-up" style={{ 
           background: 'var(--bg-secondary)',

@@ -464,3 +464,35 @@
   max-width: 800px;
   margin: 0 auto;
 }
+
+/* Admin Logo Images */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+.admin-logo-sidebar {
+  height: 95px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.admin-logo-mobile {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .admin-logo-sidebar {
+    height: 85px;
+  }
+  
+  .admin-logo-mobile {
+    height: 65px;
+  }
+}

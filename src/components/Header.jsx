@@ -1,8 +1,9 @@
 // Header.jsx
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Truck, Search, Home, Newspaper, Navigation, AlertTriangle, FileText, Moon, Sun } from 'lucide-react';
+import { Search, Home, Newspaper, Navigation, AlertTriangle, FileText, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import logo from '../images/teretnjaci.png';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,8 +28,11 @@ const Header = () => {
         <div className="container">
           <div className="header-content">
             <Link to="/" className="logo">
-              <Truck />
-              <span>Teretnjaci.ba</span>
+              <img 
+                src={logo} 
+                alt="Teretnjaci.ba" 
+                className="logo-image"
+              />
             </Link>
 
             <nav className="nav">

@@ -237,3 +237,30 @@
     text-align: center;
   }
 }
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo-image {
+  height: 95px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+@media (min-width: 769px) {
+  .logo-image {
+    height: 85px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-image {
+    height: 65px;
+  }
+}

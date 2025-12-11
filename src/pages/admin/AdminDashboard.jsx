@@ -1,8 +1,9 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Truck, FileText, Users, LogOut, Home, Menu, X, Settings, Sun, Moon } from 'lucide-react';
+import { FileText, Users, LogOut, Home, Menu, X, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import logo from '../../images/teretnjaci.png';
 
 const AdminDashboard = () => {
   const { user, logout, isOwner } = useAuth();
@@ -12,7 +13,6 @@ const AdminDashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  // Check screen size
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 1024);
@@ -41,30 +41,24 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      {/* Mobile Header - Burger button properly aligned */}
+      {/* Mobile Header */}
       {isMobile && (
         <div className="admin-mobile-header">
           <button
             onClick={toggleSidebar}
             className="mobile-menu-button"
-            style={{ 
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              padding: '0.5rem',
-              borderRadius: '0.375rem'
-            }}
           >
             <Menu size={24} />
           </button>
           
           <Link to="/" className="mobile-logo">
-            <Truck size={28} color="var(--primary)" />
-            <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Teretnjaci.ba</span>
+            <img 
+              src={logo}
+              alt="Teretnjaci.ba" 
+              className="admin-logo-mobile"
+            />
           </Link>
           
-          {/* Empty div for proper alignment - keeps the logo centered */}
           <div style={{ width: '48px', opacity: 0 }}></div>
         </div>
       )}
@@ -81,11 +75,11 @@ const AdminDashboard = () => {
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''} ${!isMobile ? 'desktop-only' : ''}`}>
         <div className="admin-sidebar-header">
           <Link to="/" className="sidebar-logo">
-            <Truck size={32} color="var(--primary)" />
-            <div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Teretnjaci.ba</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Admin panel</div>
-            </div>
+            <img 
+              src={logo} 
+              alt="Teretnjaci.ba" 
+              className="admin-logo-sidebar"
+            />
           </Link>
           
           {isMobile && (
@@ -98,12 +92,11 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* User Info - Improved alignment */}
+        {/* User Info */}
         <div className="user-info-card">
           <p className="user-info-label">Prijavljen kao</p>
           <p className="user-info-name">{user?.fullName}</p>
           <p className="user-info-role">{user?.role}</p>
-          
         </div>
 
         {/* Navigation */}
@@ -138,7 +131,8 @@ const AdminDashboard = () => {
           )}
         </nav>
 
-                <div style={{ 
+        {/* Theme Toggle */}
+        <div style={{ 
           padding: '1rem 0',
           borderTop: '1px solid var(--border)',
           borderBottom: '1px solid var(--border)',
