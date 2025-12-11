@@ -34,14 +34,14 @@
 .category-chip:hover {
   border-color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
 
 .category-chip.active {
   background: var(--gradient);
   border-color: var(--primary);
   color: white;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
 }
 
 @media (max-width: 480px) {
@@ -276,7 +276,7 @@
 .article-images img:hover {
   transform: scale(1.05);
   border-color: var(--primary);
-  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
 }
 
 @media (max-width: 768px) {

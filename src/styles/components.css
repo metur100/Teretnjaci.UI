@@ -21,12 +21,12 @@
 .btn-primary {
   background: var(--gradient);
   color: white;
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
 }
 
 .btn-secondary {
@@ -68,12 +68,12 @@
 }
 
 .btn-info {
-  background-color: #3b82f6;
+  background-color: #dc2626;
   color: white;
 }
 
 .btn-info:hover {
-  background-color: #2563eb;
+  background-color: #991b1b;
 }
 
 .btn-outline {
@@ -95,13 +95,13 @@
   padding: 1rem 1.5rem !important;
   font-size: 1rem !important;
   font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4) !important;
   transform: scale(1.05);
 }
 
 .btn-prominent:hover {
   transform: scale(1.08) translateY(-2px) !important;
-  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5) !important;
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5) !important;
 }
 
 @media (max-width: 767px) {
@@ -146,7 +146,7 @@
 .form-control:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.2);
 }
 
 textarea.form-control {
@@ -445,7 +445,7 @@ select.form-control {
 
 .pagination-btn:hover:not(.disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
 }
 
 .pagination-btn.disabled {
@@ -757,7 +757,7 @@ select.form-control {
   
   .filter-tab:hover {
     color: var(--primary);
-    background: rgba(37, 99, 235, 0.1);
+    background: rgba(220, 38, 38, 0.1);
     border-radius: 0.5rem 0.5rem 0 0;
   }
   

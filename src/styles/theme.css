@@ -4,15 +4,15 @@
 
 :root,
 [data-theme='dark'] {
-  --primary: #2563eb;
-  --primary-dark: #1e40af;
-  --primary-light: #3b82f6;
+  --primary: #dc2626;
+  --primary-dark: #991b1b;
+  --primary-light: #ef4444;
   --accent: #f59e0b;
   --accent-dark: #d97706;
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --bg-card: #1e293b;
+  --bg-primary: #000000;
+  --bg-secondary: #0b1016;
+  --bg-tertiary: #141921;
+  --bg-card: #000000;
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --border: #334155;
@@ -20,7 +20,7 @@
   --warning: #f59e0b;
   --danger: #ef4444;
   --shadow: rgba(0, 0, 0, 0.3);
-  --gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --gradient: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
 }
 
 /* ============================================
@@ -28,9 +28,9 @@
    ============================================ */
 
 [data-theme='light'] {
-  --primary: #2563eb;
-  --primary-dark: #1e40af;
-  --primary-light: #3b82f6;
+  --primary: #dc2626;
+  --primary-dark: #991b1b;
+  --primary-light: #ef4444;
   --accent: #f59e0b;
   --accent-dark: #d97706;
   --bg-primary: #ffffff;
@@ -44,7 +44,7 @@
   --warning: #f59e0b;
   --danger: #ef4444;
   --shadow: rgba(0, 0, 0, 0.1);
-  --gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --gradient: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
 }
 
 /* ============================================
@@ -53,17 +53,17 @@
 
 /* Dark Mode - Explicit overrides */
 [data-theme='dark'] .header {
-  background: rgba(15, 23, 42, 0.95) !important;
+  background: rgba(0, 0, 0, 0.95) !important;
   border-bottom-color: #334155 !important;
 }
 
 [data-theme='dark'] .bottom-nav {
-  background: rgba(15, 23, 42, 0.98) !important;
+  background: rgba(0, 0, 0, 0.98) !important;
   border-top-color: #334155 !important;
 }
 
 [data-theme='dark'] .featured-overlay {
-  background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.7) 60%, transparent 100%) !important;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.98) 0%, rgba(15, 23, 42, 0.7) 60%, transparent 100%) !important;
 }
 
 [data-theme='dark'] .article-card {
@@ -72,7 +72,7 @@
 }
 
 [data-theme='dark'] .admin-sidebar {
-  background: #1e293b !important;
+  background: #0b111b !important;
   border-right-color: #334155 !important;
 }
 

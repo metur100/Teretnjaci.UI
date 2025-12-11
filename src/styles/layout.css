@@ -3,7 +3,7 @@
    ============================================ */
 
 .header {
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(0, 0, 1, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -37,7 +37,7 @@
   width: 2.5rem;
   height: 2.5rem;
   color: var(--primary);
-  filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.5));
+  filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.5));
 }
 
 /* Desktop Navigation */
@@ -64,7 +64,7 @@
 .nav a.active {
   background: var(--gradient);
   color: white;
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
 }
 
 @media (min-width: 769px) {
@@ -87,7 +87,7 @@
 
 .search-bar:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
 }
 
 .search-bar input {
@@ -176,7 +176,7 @@
 
 .bottom-nav a.active {
   color: var(--primary-light);
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(220, 38, 38, 0.1);
   transform: scale(1.1);
 }
 
