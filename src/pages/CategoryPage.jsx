@@ -1,4 +1,4 @@
-// CategoryPage.jsx - Fixed version
+// CategoryPage.jsx - Updated version with spacing
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Megaphone,
+  TrafficCone,
 } from "lucide-react";
 
 const CategoryPage = () => {
@@ -78,7 +79,14 @@ const CategoryPage = () => {
       case "vijesti":
         return <Newspaper size={32} style={{ color: "var(--primary)" }} />;
       case "saobracaj":
-        return <AlertTriangle size={32} style={{ color: "#ff6b6b" }} />;
+        return (
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" />
+            <circle cx="12" cy="6" r="2" fill="#ef4444" />
+            <circle cx="12" cy="12" r="2" fill="#f59e0b" />
+            <circle cx="12" cy="18" r="2" fill="#22c55e" />
+          </svg>
+        );
       case "pomoc":
         return <Heart size={32} style={{ color: "#4ecdc4" }} />;
       case "dojave":
@@ -152,7 +160,7 @@ const CategoryPage = () => {
               display: "flex",
               alignItems: "center",
               gap: "1.5rem",
-              marginBottom: "1rem",
+              marginBottom: "2rem",
             }}
           >
             {getCategoryIcon()}

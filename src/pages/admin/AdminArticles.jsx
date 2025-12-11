@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// AdminArticles.jsx - Updated with debounced search
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { articlesApi } from "../../services/api";
 import {
@@ -10,6 +11,8 @@ import {
   Calendar,
   User,
   Filter,
+  Search,
+  X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { hr } from "date-fns/locale";
@@ -48,6 +51,8 @@ const AdminArticles = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchValue, setSearchValue] = useState(""); // Separate state for input value
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [articleToDelete, setArticleToDelete] = useState(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -55,7 +60,19 @@ const AdminArticles = () => {
 
   useEffect(() => {
     loadArticles();
-  }, [page, filter]);
+  }, [page, filter, searchQuery]);
+
+  // Debounce search - update searchQuery after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchValue !== searchQuery) {
+        setSearchQuery(searchValue);
+        setPage(1); // Reset to first page on new search
+      }
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchValue, searchQuery]);
 
   const loadArticles = async () => {
     try {
@@ -63,13 +80,17 @@ const AdminArticles = () => {
 
       const params = {
         page,
-        pageSize: 15, // Reduced for better mobile view
+        pageSize: 15,
       };
 
       if (filter === "published") {
         params.isPublished = true;
       } else if (filter === "draft") {
         params.isPublished = false;
+      }
+
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
       }
 
       const response = await articlesApi.getAllAdmin(params);
@@ -101,6 +122,16 @@ const AdminArticles = () => {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchValue(e.target.value); // Only update local state, not searchQuery
+  };
+
+  const clearSearch = () => {
+    setSearchValue("");
+    setSearchQuery("");
+    setPage(1);
+  };
+
   const formatDate = (article) => {
     if (article.publishedAt) {
       return format(new Date(article.publishedAt), "d. MMM", { locale: hr });
@@ -119,14 +150,6 @@ const AdminArticles = () => {
   const getStatusIcon = (isPublished) => {
     return isPublished ? "●" : "◌";
   };
-
-  if (loading) {
-    return (
-      <div className="loading">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -160,442 +183,502 @@ const AdminArticles = () => {
           </button>
         </div>
 
-        {/* Filter Tabs - Desktop */}
-        <div
-          className="filter-tabs desktop-only"
-          style={{ marginBottom: "2rem" }}
-        >
-          <button
-            className={`filter-tab ${filter === "all" ? "active" : ""}`}
-            onClick={() => setFilter("all")}
-          >
-            Svi članci
-          </button>
-          <button
-            className={`filter-tab ${filter === "published" ? "active" : ""}`}
-            onClick={() => setFilter("published")}
-          >
-            Objavljeni
-          </button>
-          <button
-            className={`filter-tab ${filter === "draft" ? "active" : ""}`}
-            onClick={() => setFilter("draft")}
-          >
-            Draftovi
-          </button>
+        {/* Search Bar */}
+        <div style={{ marginBottom: "1.5rem" }}>
+          <div className="search-bar" style={{ 
+            maxWidth: "500px", 
+            width: "100%",
+            position: "relative"
+          }}>
+            <Search size={20} style={{ color: "var(--text-secondary)" }} />
+            <input
+              type="text"
+              placeholder="Pretraži članke po naslovu..."
+              value={searchValue} // Use searchValue here
+              onChange={handleSearchChange}
+              style={{
+                flex: 1,
+                paddingRight: searchValue ? "2.5rem" : "0"
+              }}
+            />
+            {searchValue && (
+              <button
+                onClick={clearSearch}
+                style={{
+                  position: "absolute",
+                  right: "1rem",
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-secondary)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0.25rem"
+                }}
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Mobile Filter Dropdown */}
-        {showMobileFilters && (
-          <div
-            className="mobile-only"
-            style={{
-              marginBottom: "1rem",
-              background: "var(--bg-card)",
-              borderRadius: "0.75rem",
-              border: "1px solid var(--border)",
-              padding: "1rem",
-            }}
-          >
+        {/* Loading State - Keep search bar visible */}
+        {loading ? (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '200px' 
+          }}>
+            <div className="spinner"></div>
+          </div>
+        ) : (
+          <>
+            {/* Rest of your UI remains the same... */}
+            {/* Filter Tabs - Desktop */}
             <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-              }}
+              className="filter-tabs desktop-only"
+              style={{ marginBottom: "2rem" }}
             >
               <button
-                className={`filter-tab-mobile ${
-                  filter === "all" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setFilter("all");
-                  setShowMobileFilters(false);
-                }}
-                style={{
-                  padding: "0.75rem",
-                  background:
-                    filter === "all" ? "var(--primary)" : "var(--bg-tertiary)",
-                  color: filter === "all" ? "white" : "var(--text-primary)",
-                  border: "none",
-                  borderRadius: "0.5rem",
-                  textAlign: "left",
-                }}
+                className={`filter-tab ${filter === "all" ? "active" : ""}`}
+                onClick={() => setFilter("all")}
               >
                 Svi članci
               </button>
               <button
-                className={`filter-tab-mobile ${
-                  filter === "published" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setFilter("published");
-                  setShowMobileFilters(false);
-                }}
-                style={{
-                  padding: "0.75rem",
-                  background:
-                    filter === "published"
-                      ? "var(--primary)"
-                      : "var(--bg-tertiary)",
-                  color:
-                    filter === "published" ? "white" : "var(--text-primary)",
-                  border: "none",
-                  borderRadius: "0.5rem",
-                  textAlign: "left",
-                }}
+                className={`filter-tab ${filter === "published" ? "active" : ""}`}
+                onClick={() => setFilter("published")}
               >
                 Objavljeni
               </button>
               <button
-                className={`filter-tab-mobile ${
-                  filter === "draft" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setFilter("draft");
-                  setShowMobileFilters(false);
-                }}
-                style={{
-                  padding: "0.75rem",
-                  background:
-                    filter === "draft"
-                      ? "var(--primary)"
-                      : "var(--bg-tertiary)",
-                  color: filter === "draft" ? "white" : "var(--text-primary)",
-                  border: "none",
-                  borderRadius: "0.5rem",
-                  textAlign: "left",
-                }}
+                className={`filter-tab ${filter === "draft" ? "active" : ""}`}
+                onClick={() => setFilter("draft")}
               >
                 Draftovi
               </button>
             </div>
-          </div>
-        )}
 
-        {articles.length > 0 ? (
-          <>
-            {/* Desktop Table */}
-            <div className="table-container desktop-only">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Naslov</th>
-                    <th>Status</th>
-                    <th>Datum</th>
-                    <th style={{ width: "150px" }}>Akcije</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {articles.map((article) => (
-                    <tr
-                      key={article.id}
-                      className={!article.isPublished ? "draft-row" : ""}
-                    >
-                      <td>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: "0.75rem",
-                          }}
+            {/* Mobile Filter Dropdown */}
+            {showMobileFilters && (
+              <div
+                className="mobile-only"
+                style={{
+                  marginBottom: "1rem",
+                  background: "var(--bg-card)",
+                  borderRadius: "0.75rem",
+                  border: "1px solid var(--border)",
+                  padding: "1rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <button
+                    className={`filter-tab-mobile ${
+                      filter === "all" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilter("all");
+                      setShowMobileFilters(false);
+                    }}
+                    style={{
+                      padding: "0.75rem",
+                      background:
+                        filter === "all" ? "var(--primary)" : "var(--bg-tertiary)",
+                      color: filter === "all" ? "white" : "var(--text-primary)",
+                      border: "none",
+                      borderRadius: "0.5rem",
+                      textAlign: "left",
+                    }}
+                  >
+                    Svi članci
+                  </button>
+                  <button
+                    className={`filter-tab-mobile ${
+                      filter === "published" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilter("published");
+                      setShowMobileFilters(false);
+                    }}
+                    style={{
+                      padding: "0.75rem",
+                      background:
+                        filter === "published"
+                          ? "var(--primary)"
+                          : "var(--bg-tertiary)",
+                      color:
+                        filter === "published" ? "white" : "var(--text-primary)",
+                      border: "none",
+                      borderRadius: "0.5rem",
+                      textAlign: "left",
+                    }}
+                  >
+                    Objavljeni
+                  </button>
+                  <button
+                    className={`filter-tab-mobile ${
+                      filter === "draft" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilter("draft");
+                      setShowMobileFilters(false);
+                    }}
+                    style={{
+                      padding: "0.75rem",
+                      background:
+                        filter === "draft"
+                          ? "var(--primary)"
+                          : "var(--bg-tertiary)",
+                      color: filter === "draft" ? "white" : "var(--text-primary)",
+                      border: "none",
+                      borderRadius: "0.5rem",
+                      textAlign: "left",
+                    }}
+                  >
+                    Draftovi
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {articles.length > 0 ? (
+              <>
+                {/* Desktop Table */}
+                <div className="table-container desktop-only">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Naslov</th>
+                        <th>Status</th>
+                        <th>Datum</th>
+                        <th style={{ width: "150px" }}>Akcije</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {articles.map((article) => (
+                        <tr
+                          key={article.id}
+                          className={!article.isPublished ? "draft-row" : ""}
                         >
-                          <div
-                            style={{
-                              width: "8px",
-                              height: "8px",
-                              borderRadius: "50%",
-                              backgroundColor: getStatusColor(
-                                article.isPublished
-                              ),
-                              marginTop: "0.5rem",
-                              flexShrink: 0,
-                            }}
-                          />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <strong
+                          <td>
+                            <div
                               style={{
-                                display: "block",
-                                marginBottom: "0.25rem",
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: "0.75rem",
                               }}
                             >
-                              {article.title}
-                            </strong>
+                              <div
+                                style={{
+                                  width: "8px",
+                                  height: "8px",
+                                  borderRadius: "50%",
+                                  backgroundColor: getStatusColor(
+                                    article.isPublished
+                                  ),
+                                  marginTop: "0.5rem",
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <strong
+                                  style={{
+                                    display: "block",
+                                    marginBottom: "0.25rem",
+                                  }}
+                                >
+                                  {article.title}
+                                </strong>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "1rem",
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontSize: "0.875rem",
+                                      color: "var(--text-secondary)",
+                                    }}
+                                  >
+                                    {article.categoryName}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: "0.875rem",
+                                      color: "var(--text-secondary)",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.25rem",
+                                    }}
+                                  >
+                                    <User size={12} />
+                                    {article.authorName}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: "0.875rem",
+                                      color: "var(--text-secondary)",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "0.25rem",
+                                    }}
+                                  >
+                                    <Eye size={12} />
+                                    {article.viewCount}
+                                  </span>
+                                </div>
+                                {article.summary && (
+                                  <p
+                                    style={{
+                                      fontSize: "0.875rem",
+                                      color: "var(--text-secondary)",
+                                      marginTop: "0.5rem",
+                                      display: "-webkit-box",
+                                      WebkitLineClamp: 2,
+                                      WebkitBoxOrient: "vertical",
+                                      overflow: "hidden",
+                                    }}
+                                  >
+                                    {article.summary}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span
+                              className="status-badge"
+                              style={{
+                                backgroundColor: `${getStatusColor(
+                                  article.isPublished
+                                )}20`,
+                                color: getStatusColor(article.isPublished),
+                              }}
+                            >
+                              {getStatusText(article.isPublished)}
+                            </span>
+                          </td>
+                          <td>
                             <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "1rem",
-                                flexWrap: "wrap",
+                                gap: "0.5rem",
                               }}
                             >
-                              <span
-                                style={{
-                                  fontSize: "0.875rem",
-                                  color: "var(--text-secondary)",
-                                }}
-                              >
-                                {article.categoryName}
-                              </span>
-                              <span
-                                style={{
-                                  fontSize: "0.875rem",
-                                  color: "var(--text-secondary)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "0.25rem",
-                                }}
-                              >
-                                <User size={12} />
-                                {article.authorName}
-                              </span>
-                              <span
-                                style={{
-                                  fontSize: "0.875rem",
-                                  color: "var(--text-secondary)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "0.25rem",
-                                }}
-                              >
-                                <Eye size={12} />
-                                {article.viewCount}
-                              </span>
+                              <Calendar size={14} />
+                              {formatDate(article)}
                             </div>
-                            {article.summary && (
-                              <p
-                                style={{
-                                  fontSize: "0.875rem",
-                                  color: "var(--text-secondary)",
-                                  marginTop: "0.5rem",
-                                  display: "-webkit-box",
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: "vertical",
-                                  overflow: "hidden",
-                                }}
+                          </td>
+                          <td>
+                            <div className="table-actions">
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() =>
+                                  navigate(`/admin/clanci/uredi/${article.id}`)
+                                }
+                                title="Uredi"
                               >
-                                {article.summary}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className="status-badge"
-                          style={{
-                            backgroundColor: `${getStatusColor(
-                              article.isPublished
-                            )}20`,
-                            color: getStatusColor(article.isPublished),
-                          }}
-                        >
-                          {getStatusText(article.isPublished)}
-                        </span>
-                      </td>
-                      <td>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                          }}
-                        >
-                          <Calendar size={14} />
-                          {formatDate(article)}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="table-actions">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() =>
-                              navigate(`/admin/clanci/uredi/${article.id}`)
-                            }
-                            title="Uredi"
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() =>
+                                  handleDeleteClick(article.id, article.title)
+                                }
+                                title="Obriši"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                              {article.isPublished && (
+                                <button
+                                  className="btn btn-outline btn-sm"
+                                  onClick={() =>
+                                    window.open(`/clanak/${article.slug}`, "_blank")
+                                  }
+                                  title="Pogledaj članak"
+                                >
+                                  <Eye size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card List */}
+                <div className="mobile-card-list">
+                  {articles.map((article) => (
+                    <div key={article.id} className="mobile-card">
+                      <div className="mobile-card-header">
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
+                              marginBottom: "0.5rem",
+                            }}
                           >
-                            <Edit size={16} />
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() =>
-                              handleDeleteClick(article.id, article.title)
-                            }
-                            title="Obriši"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                          {article.isPublished && (
-                            <button
-                              className="btn btn-outline btn-sm"
-                              onClick={() =>
-                                window.open(`/clanak/${article.slug}`, "_blank")
-                              }
-                              title="Pogledaj članak"
+                            <div
+                              style={{
+                                width: "8px",
+                                height: "8px",
+                                borderRadius: "50%",
+                                backgroundColor: getStatusColor(
+                                  article.isPublished
+                                ),
+                                flexShrink: 0,
+                              }}
+                            />
+                            <span
+                              className="status-badge"
+                              style={{
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                backgroundColor: `${getStatusColor(
+                                  article.isPublished
+                                )}20`,
+                                color: getStatusColor(article.isPublished),
+                              }}
                             >
-                              <Eye size={16} />
-                            </button>
+                              {getStatusText(article.isPublished)}
+                            </span>
+                          </div>
+                          <h3 className="mobile-card-title">{article.title}</h3>
+                          {article.summary && (
+                            <p
+                              style={{
+                                fontSize: "0.875rem",
+                                color: "var(--text-secondary)",
+                                marginTop: "0.5rem",
+                                display: "-webkit-box",
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {article.summary}
+                            </p>
                           )}
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
 
-            {/* Mobile Card List */}
-            <div className="mobile-card-list">
-              {articles.map((article) => (
-                <div key={article.id} className="mobile-card">
-                  <div className="mobile-card-header">
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          marginBottom: "0.5rem",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "50%",
-                            backgroundColor: getStatusColor(
-                              article.isPublished
-                            ),
-                            flexShrink: 0,
-                          }}
-                        />
-                        <span
-                          className="status-badge"
-                          style={{
-                            fontSize: "0.75rem",
-                            padding: "0.25rem 0.5rem",
-                            backgroundColor: `${getStatusColor(
-                              article.isPublished
-                            )}20`,
-                            color: getStatusColor(article.isPublished),
-                          }}
-                        >
-                          {getStatusText(article.isPublished)}
+                      <div className="mobile-card-details">
+                        <span>
+                          <FileText size={14} />
+                          {article.categoryName}
+                        </span>
+                        <span>
+                          <User size={14} />
+                          {article.authorName}
+                        </span>
+                        <span>
+                          <Calendar size={14} />
+                          {formatDate(article)}
+                        </span>
+                        <span>
+                          <Eye size={14} />
+                          {article.viewCount}
                         </span>
                       </div>
-                      <h3 className="mobile-card-title">{article.title}</h3>
-                      {article.summary && (
-                        <p
-                          style={{
-                            fontSize: "0.875rem",
-                            color: "var(--text-secondary)",
-                            marginTop: "0.5rem",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
+
+                      <div className="mobile-card-actions">
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() =>
+                            navigate(`/admin/clanci/uredi/${article.id}`)
+                          }
                         >
-                          {article.summary}
-                        </p>
-                      )}
+                          <Edit size={16} />
+                          Uredi
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() =>
+                            handleDeleteClick(article.id, article.title)
+                          }
+                        >
+                          <Trash2 size={16} />
+                          Obriši
+                        </button>
+                        {article.isPublished && (
+                          <button
+                            className="btn btn-outline"
+                            onClick={() =>
+                              window.open(`/clanak/${article.slug}`, "_blank")
+                            }
+                          >
+                            <Eye size={16} />
+                            Pogledaj
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
 
-                  <div className="mobile-card-details">
-                    <span>
-                      <FileText size={14} />
-                      {article.categoryName}
-                    </span>
-                    <span>
-                      <User size={14} />
-                      {article.authorName}
-                    </span>
-                    <span>
-                      <Calendar size={14} />
-                      {formatDate(article)}
-                    </span>
-                    <span>
-                      <Eye size={14} />
-                      {article.viewCount}
-                    </span>
-                  </div>
-
-                  <div className="mobile-card-actions">
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() =>
-                        navigate(`/admin/clanci/uredi/${article.id}`)
-                      }
-                    >
-                      <Edit size={16} />
-                      Uredi
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() =>
-                        handleDeleteClick(article.id, article.title)
-                      }
-                    >
-                      <Trash2 size={16} />
-                      Obriši
-                    </button>
-                    {article.isPublished && (
+                {totalPages > 1 && (
+                  <div className="pagination">
+                    {page > 1 && (
                       <button
-                        className="btn btn-outline"
-                        onClick={() =>
-                          window.open(`/clanak/${article.slug}`, "_blank")
-                        }
+                        className="btn btn-secondary"
+                        onClick={() => setPage(page - 1)}
                       >
-                        <Eye size={16} />
-                        Pogledaj
+                        Prethodna
+                      </button>
+                    )}
+                    <span className="page-info">
+                      Stranica {page} od {totalPages}
+                    </span>
+                    {page < totalPages && (
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setPage(page + 1)}
+                      >
+                        Sljedeća
                       </button>
                     )}
                   </div>
-                </div>
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="pagination">
-                {page > 1 && (
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setPage(page - 1)}
-                  >
-                    Prethodna
-                  </button>
                 )}
-                <span className="page-info">
-                  Stranica {page} od {totalPages}
-                </span>
-                {page < totalPages && (
+              </>
+            ) : (
+              <div className="empty-state">
+                <FileText size={48} color="var(--text-secondary)" />
+                <p style={{ color: "var(--text-secondary)", margin: "1rem 0" }}>
+                  {searchQuery ? `Nema rezultata za "${searchQuery}"` : (
+                    <>
+                      {filter === "all" && "Nema članaka za prikaz"}
+                      {filter === "published" && "Nema objavljenih članaka"}
+                      {filter === "draft" && "Nema draft članaka"}
+                    </>
+                  )}
+                </p>
+                {!searchQuery && (
                   <button
-                    className="btn btn-secondary"
-                    onClick={() => setPage(page + 1)}
+                    className="btn btn-primary"
+                    onClick={() => navigate("/admin/clanci/novi")}
                   >
-                    Sljedeća
+                    <Plus size={18} />
+                    Kreiraj novi članak
                   </button>
                 )}
               </div>
             )}
           </>
-        ) : (
-          <div className="empty-state">
-            <FileText size={48} color="var(--text-secondary)" />
-            <p style={{ color: "var(--text-secondary)", margin: "1rem 0" }}>
-              {filter === "all" && "Nema članaka za prikaz"}
-              {filter === "published" && "Nema objavljenih članaka"}
-              {filter === "draft" && "Nema draft članaka"}
-            </p>
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate("/admin/clanci/novi")}
-            >
-              <Plus size={18} />
-              Kreiraj novi članak
-            </button>
-          </div>
         )}
       </div>
     </>

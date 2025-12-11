@@ -1,3 +1,4 @@
+// ArticleDetail.jsx - Updated version
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { articlesApi } from '../services/api';
@@ -119,10 +120,6 @@ const ArticleDetail = () => {
                 <div className="image-error">
                   <ImageIcon size={48} />
                   <p>Slika nije dostupna</p>
-                </div>
-              )}
-              {image.isPrimary && (
-                <div className="image-caption">
                 </div>
               )}
             </div>

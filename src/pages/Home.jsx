@@ -1,15 +1,17 @@
-// Home.jsx
+// Home.jsx - Updated with proper icons
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { articlesApi, categoriesApi } from '../services/api';
 import ArticleCard from '../components/ArticleCard';
 import { 
   Eye, Calendar, User, TrendingUp, Clock, Facebook, Instagram, 
-  Sparkles, Flame, Zap, AlertTriangle, Heart, Apple, Smartphone 
+  Sparkles, Flame, Zap, AlertTriangle, Heart, Apple, Smartphone, Megaphone, Newspaper, FileText
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
-import sponzorImg from '../images/sponzor.jpg';
+import sponzorImg from '../images/sponzor.png';
+import sponzor2Img from '../images/sponzor2.png';
+import sponzor3Img from '../images/sponzor3.png';
 
 const Home = () => {
   const [searchParams] = useSearchParams();
@@ -20,12 +22,21 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [featuredHovered, setFeaturedHovered] = useState(false);
+  const [currentSponsor, setCurrentSponsor] = useState(0);
 
   const searchQuery = searchParams.get('search');
+  const sponsors = [sponzorImg, sponzor2Img, sponzor3Img];
 
   useEffect(() => {
     loadData();
   }, [searchQuery]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSponsor((prev) => (prev + 1) % sponsors.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadData = async () => {
     try {
@@ -81,6 +92,30 @@ const Home = () => {
         return <Heart size={14} />;
       default:
         return null;
+    }
+  };
+
+  const getCategoryHeaderIcon = (categorySlug) => {
+    switch (categorySlug.toLowerCase()) {
+      case 'saobracaj':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" />
+            <circle cx="12" cy="6" r="2" fill="#ef4444" />
+            <circle cx="12" cy="12" r="2" fill="#f59e0b" />
+            <circle cx="12" cy="18" r="2" fill="#22c55e" />
+          </svg>
+        );
+      case 'pomoc':
+        return <Heart size={24} style={{ color: '#4ecdc4' }} />;
+      case 'dojave':
+        return <Megaphone size={24} style={{ color: '#ffd166' }} />;
+      case 'vijesti':
+        return <Newspaper size={24} style={{ color: 'var(--primary)' }} />;
+      case 'oglasi':
+        return <FileText size={24} style={{ color: '#06d6a0' }} />;
+      default:
+        return <Newspaper size={24} style={{ color: 'var(--text-secondary)' }} />;
     }
   };
 
@@ -245,7 +280,6 @@ const Home = () => {
         </div>
       </section>
 
-      
       {!searchQuery && (
         <section className="fade-in-up" style={{ 
           background: 'linear-gradient(135deg, rgba(24, 119, 242, 0.05) 0%, rgba(188, 24, 136, 0.05) 100%)',
@@ -337,9 +371,7 @@ const Home = () => {
                 marginBottom: '2rem'
               }}>
                 <h2 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  {category.slug === 'saobracaj' && <AlertTriangle size={24} style={{ color: '#ff6b6b' }} />}
-                  {category.slug === 'pomoc' && <Heart size={24} style={{ color: '#ff6b6b' }} />}
-                  
+                  {getCategoryHeaderIcon(category.slug)}
                   {category.name}
                 </h2>
                 <button
@@ -523,79 +555,164 @@ const Home = () => {
         </section>
       )}
       
-      {!searchQuery && (
-        <section className="fade-in-up" style={{ 
-          background: 'var(--bg-secondary)',
-          padding: '4rem 0',
-          marginTop: '3rem'
+{!searchQuery && (
+  <section className="fade-in-up" style={{ 
+    background: 'var(--bg-secondary)',
+    padding: '4rem 0',
+    marginTop: '3rem',
+    overflow: 'hidden'
+  }}>
+    <div className="container">
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <h2 className="section-title" style={{ fontSize: '2rem' }}>
+          Sponzori stranice
+        </h2>
+      </div>
+      
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        overflow: 'hidden',
+        padding: '2rem 0'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          animation: 'scroll 25s linear infinite',
+          width: 'max-content'
         }}>
-          <div className="container">
-            <div style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-              <h2 className="section-title" style={{ marginBottom: '2rem', fontSize: '2rem' }}>
-                Sponzor stranice
-              </h2>
-              <div className="gradient-border hover-lift" style={{
-                background: 'var(--bg-card)',
-                border: '2px solid var(--border)',
-                borderRadius: '1.5rem',
-                padding: '2.5rem',
-                transition: 'all 0.3s',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <div className="hover-grow" style={{ 
-                  position: 'relative', 
-                  overflow: 'hidden', 
-                  borderRadius: '0.75rem', 
-                  marginBottom: '1.5rem',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)'
-                }}>
-                  <img
-                    src={sponzorImg}
-                    alt="Sponzor"
-                    style={{
-                      width: '100%',
-                      height: 'auto',
-                      borderRadius: '0.75rem',
-                      transition: 'transform 0.5s ease'
-                    }}
-                    onError={(e) => {
-                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="200"%3E%3Cdefs%3E%3ClinearGradient id="sponsorGrad" x1="0%" y1="0%" x2="100%" y2="100%"%3E%3Cstop offset="0%" stop-color="%234a5568"/%3E%3Cstop offset="100%" stop-color="%232d3748"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="400" height="200" fill="url(%23sponsorGrad)"/%3E%3Ctext fill="%23cbd5e1" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" x="200" y="100"%3ESponzor Teretnjaci.ba%3C/text%3E%3C/svg%3E';
-                    }}
-                  />
-                </div>
-                <div style={{ 
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
-                  height: '1px',
-                  margin: '1.5rem 0'
-                }} />
-                <p style={{ 
-                  color: 'var(--text-secondary)', 
-                  fontSize: '1rem',
-                  lineHeight: 1.8,
-                  marginBottom: 0
-                }}>
-                  Želite da vaša kompanija bude ovdje?<br />
-                  <a 
-                    href="mailto:kontakt@teretnjaci.ba" 
-                    style={{
-                      color: 'var(--primary)',
-                      textDecoration: 'none',
-                      fontWeight: 700,
-                      fontSize: '1.1rem',
-                      transition: 'color 0.3s'
-                    }}
-                    onMouseEnter={(e) => e.target.style.color = 'var(--accent)'}
-                    onMouseLeave={(e) => e.target.style.color = 'var(--primary)'}
-                  >
-                    Kontaktirajte nas
-                  </a> za oglašavanje i saradnju.
-                </p>
-              </div>
+          {/* First set of sponsors */}
+          {sponsors.map((sponsor, index) => (
+            <div 
+              key={`sponsor-${index}`}
+              style={{
+                flex: '0 0 auto',
+                margin: '0 3rem',
+                height: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <img
+                src={sponsor}
+                alt={`Sponzor ${index + 1}`}
+                style={{
+                  height: '80px',
+                  width: 'auto',
+                  maxWidth: '200px',
+                  objectFit: 'contain',
+                  filter: 'grayscale(0)',
+                  opacity: 0.9,
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.filter = 'grayscale(0)';
+                  e.target.style.opacity = '1';
+                  e.target.style.transform = 'scale(1.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.filter = 'grayscale(0)';
+                  e.target.style.opacity = '0.9';
+                  e.target.style.transform = 'scale(1)';
+                }}
+                onError={(e) => {
+                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect width="200" height="80" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="45"%3ESponzor%3C/text%3E%3C/svg%3E';
+                }}
+              />
             </div>
-          </div>
-        </section>
-      )}
+          ))}
+          
+          {/* Duplicate set for seamless loop */}
+          {sponsors.map((sponsor, index) => (
+            <div 
+              key={`sponsor-duplicate-${index}`}
+              style={{
+                flex: '0 0 auto',
+                margin: '0 3rem',
+                height: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <img
+                src={sponsor}
+                alt={`Sponzor ${index + 1}`}
+                style={{
+                  height: '80px',
+                  width: 'auto',
+                  maxWidth: '200px',
+                  objectFit: 'contain',
+                  filter: 'grayscale(0)',
+                  opacity: 0.9,
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.filter = 'grayscale(0)';
+                  e.target.style.opacity = '1';
+                  e.target.style.transform = 'scale(1.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.filter = 'grayscale(0)';
+                  e.target.style.opacity = '0.9';
+                  e.target.style.transform = 'scale(1)';
+                }}
+                onError={(e) => {
+                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect width="200" height="80" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="45"%3ESponzor%3C/text%3E%3C/svg%3E';
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div style={{ 
+        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
+        height: '1px',
+        margin: '3rem auto 2rem',
+        maxWidth: '600px'
+      }} />
+      
+      <p style={{ 
+        color: 'var(--text-secondary)', 
+        fontSize: '1rem',
+        lineHeight: 1.8,
+        marginBottom: 0,
+        textAlign: 'center'
+      }}>
+        Želite da vaša kompanija bude ovdje?<br />
+        <a 
+          href="mailto:kontakt@teretnjaci.ba" 
+          style={{
+            color: 'var(--primary)',
+            textDecoration: 'none',
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            transition: 'color 0.3s'
+          }}
+          onMouseEnter={(e) => e.target.style.color = 'var(--accent)'}
+          onMouseLeave={(e) => e.target.style.color = 'var(--primary)'}
+        >
+          Kontaktirajte nas
+        </a> za oglašavanje i saradnju.
+      </p>
+    </div>
+    
+    <style>
+      {`
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}
+    </style>
+  </section>
+)}
     </>
   );
 };
