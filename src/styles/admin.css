@@ -298,6 +298,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  padding-top: 20px;
 }
 
 @media (max-width: 767px) {
@@ -474,17 +475,16 @@
 }
 
 .admin-logo-sidebar {
-  height: 95px;
-  width: auto;
-  object-fit: contain;
-  display: block;
+  height: 65px;
+  transform: scale(2.5);
+  transform-origin: center;
+  padding-left: 30px;
 }
 
 .admin-logo-mobile {
   height: 45px;
-  width: auto;
-  object-fit: contain;
-  display: block;
+  transform: scale(2);
+  transform-origin: center;
 }
 
 @media (max-width: 768px) {
