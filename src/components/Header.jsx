@@ -141,15 +141,6 @@ const Header = () => {
             <FileText />
             <span>Oglasi</span>
           </Link>
-          {/* Admin Login Icon in Mobile Navigation - Added */}
-          <Link 
-            to="/admin/login" 
-            className={location.pathname.includes('/admin') ? 'active' : ''}
-            aria-label="Admin login"
-          >
-            <Lock size={20} />
-            <span>Admin</span>
-          </Link>
         </div>
       </nav>
     </>
