@@ -172,127 +172,73 @@ const CategoryPage = () => {
                 ))}
               </div>
 
-              {totalPages > 1 && (
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  marginTop: '4rem',
-                  padding: '2rem',
-                  background: 'var(--bg-secondary)',
-                  borderRadius: '1rem',
-                  border: '1px solid var(--border)'
-                }}>
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="btn hover-grow"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.75rem 1.5rem',
-                      background: currentPage === 1 ? 'var(--bg-card)' : 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
-                      color: currentPage === 1 ? 'var(--text-secondary)' : 'white',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === 1 ? 0.5 : 1,
-                      fontWeight: 600,
-                      transition: 'all 0.3s'
-                    }}
-                  >
-                    <ChevronLeft size={18} />
-                    Prethodna
-                  </button>
+// CategoryPage.jsx - Updated Pagination Section
+{totalPages > 1 && (
+  <div className="pagination-wrapper">
+    <div className="pagination-container">
+      <button
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`pagination-btn prev-btn ${currentPage === 1 ? 'disabled' : ''}`}
+      >
+        <ChevronLeft size={18} />
+        <span className="btn-text">Prethodna</span>
+      </button>
 
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: '0.5rem',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center'
-                  }}>
-                    {[...Array(totalPages)].map((_, index) => {
-                      const pageNum = index + 1;
-                      
-                      const showPage = 
-                        pageNum === 1 || 
-                        pageNum === totalPages || 
-                        (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
-                      
-                      const showEllipsis = 
-                        (pageNum === 2 && currentPage > 3) ||
-                        (pageNum === totalPages - 1 && currentPage < totalPages - 2);
-                      
-                      if (!showPage && !showEllipsis) return null;
-                      
-                      if (showEllipsis) {
-                        return (
-                          <span 
-                            key={`ellipsis-${pageNum}`}
-                            style={{
-                              padding: '0.75rem 0.5rem',
-                              color: 'var(--text-secondary)',
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}
-                          >
-                            ...
-                          </span>
-                        );
-                      }
-                      
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={pageNum === currentPage ? '' : 'hover-grow'}
-                          style={{
-                            padding: '0.75rem 1.25rem',
-                            background: pageNum === currentPage 
-                              ? 'linear-gradient(135deg, var(--primary), var(--accent))' 
-                              : 'var(--bg-card)',
-                            color: pageNum === currentPage ? 'white' : 'var(--text-primary)',
-                            border: pageNum === currentPage ? 'none' : '1px solid var(--border)',
-                            borderRadius: '0.5rem',
-                            cursor: 'pointer',
-                            fontWeight: pageNum === currentPage ? 700 : 600,
-                            minWidth: '45px',
-                            transition: 'all 0.3s',
-                            boxShadow: pageNum === currentPage ? '0 4px 12px rgba(0, 0, 0, 0.2)' : 'none'
-                          }}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
+      <div className="page-numbers">
+        {[...Array(totalPages)].map((_, index) => {
+          const pageNum = index + 1;
+          
+          // Show first page, last page, current page, and pages around current page
+          const showPage = 
+            totalPages <= 7 || 
+            pageNum === 1 || 
+            pageNum === totalPages || 
+            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
+          
+          const showEllipsis = 
+            totalPages > 7 && (
+              (pageNum === 2 && currentPage > 3) ||
+              (pageNum === totalPages - 1 && currentPage < totalPages - 2)
+            );
+          
+          if (!showPage && !showEllipsis) return null;
+          
+          if (showEllipsis) {
+            return (
+              <span 
+                key={`ellipsis-${pageNum}`}
+                className="page-ellipsis"
+              >
+                ...
+              </span>
+            );
+          }
+          
+          return (
+            <button
+              key={pageNum}
+              onClick={() => handlePageChange(pageNum)}
+              className={`page-btn ${pageNum === currentPage ? 'active' : ''}`}
+            >
+              {pageNum}
+            </button>
+          );
+        })}
+      </div>
 
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="btn hover-grow"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.75rem 1.5rem',
-                      background: currentPage === totalPages ? 'var(--bg-card)' : 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
-                      color: currentPage === totalPages ? 'var(--text-secondary)' : 'white',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === totalPages ? 0.5 : 1,
-                      fontWeight: 600,
-                      transition: 'all 0.3s'
-                    }}
-                  >
-                    Sljedeća
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              )}
+      <button
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`pagination-btn next-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+      >
+        <span className="btn-text">Sljedeća</span>
+        <ChevronRight size={18} />
+      </button>
+    </div>
+
+  </div>
+)}
             </>
           ) : (
             <div className="fade-in-up" style={{ 
