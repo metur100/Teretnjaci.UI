@@ -2,7 +2,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://teretnjaci.runasp.net/api',
+  baseURL: 'https://teretnjaci.runasp.net/api',
+  //baseURL: 'https://localhost:3103/api',
   headers: {
     'Content-Type': 'application/json'
   }
