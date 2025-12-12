@@ -357,7 +357,6 @@ const Home = () => {
                 (article, index) => (
                   <div
                     key={article.id}
-
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <ArticleCard article={article} />
@@ -396,98 +395,132 @@ const Home = () => {
             background:
               "linear-gradient(135deg, rgba(24, 119, 242, 0.05) 0%, rgba(188, 24, 136, 0.05) 100%)",
             padding: "4rem 0",
-            margin: "3rem 0",
+            marginTop: "3rem",
             borderTop: "1px solid var(--border)",
             borderBottom: "1px solid var(--border)",
+            overflow: "hidden",
           }}
         >
           <div className="container">
             <div
               style={{
-                textAlign: "center",
-                maxWidth: "600px",
-                margin: "0 auto",
+                position: "relative",
+                width: "100%",
+                overflow: "hidden",
+                padding: "2rem 0",
               }}
             >
-              <h2
-                className="section-title"
-                style={{ marginBottom: "1.5rem", fontSize: "2rem" }}
-              >
-                Pratite nas
-              </h2>
-              <p
-                style={{
-                  color: "var(--text-primary)",
-                  marginBottom: "2.5rem",
-                  fontSize: "1.1rem",
-                }}
-              >
-                Budite u toku sa najnovijim dešavanjima u svijetu teretnog
-                transporta
-              </p>
               <div
                 style={{
                   display: "flex",
-                  gap: "1.5rem",
-                  justifyContent: "center",
-                  flexWrap: "wrap",
+                  alignItems: "center",
+                  animation: "scroll 25s linear infinite",
+                  width: "max-content",
                 }}
               >
-                <a
-                  href="https://facebook.com/teretnjaci.ba"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="social-link hover-grow"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    padding: "1.25rem 2.5rem",
-                    background:
-                      "linear-gradient(135deg, #1877f2 0%, #166fe5 100%)",
-                    color: "white",
-                    borderRadius: "0.75rem",
-                    textDecoration: "none",
-                    fontWeight: 600,
-                    fontSize: "1.1rem",
-                    transition: "all 0.3s",
-                    boxShadow: "0 4px 20px rgba(24, 119, 242, 0.4)",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  <Facebook size={28} />
-                  Facebook
-                </a>
-                <a
-                  href="https://instagram.com/teretnjaci.ba"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="social-link hover-grow"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    padding: "1.25rem 2.5rem",
-                    background:
-                      "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
-                    color: "white",
-                    borderRadius: "0.75rem",
-                    textDecoration: "none",
-                    fontWeight: 600,
-                    fontSize: "1.1rem",
-                    transition: "all 0.3s",
-                    boxShadow: "0 4px 20px rgba(188, 24, 136, 0.4)",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  <Instagram size={28} />
-                  Instagram
-                </a>
+                {/* First set of sponsors */}
+                {sponsors.map((sponsor, index) => (
+                  <div
+                    key={`sponsor-${index}`}
+                    style={{
+                      flex: "0 0 auto",
+                      margin: "0 3rem",
+                      height: "80px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      src={sponsor}
+                      alt={`Sponzor ${index + 1}`}
+                      style={{
+                        height: "80px",
+                        width: "auto",
+                        maxWidth: "200px",
+                        objectFit: "contain",
+                        filter: "grayscale(0)",
+                        transform: "scale(1.5)",
+                        opacity: 0.9,
+                        transition: "all 0.3s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.filter = "grayscale(0)";
+                        e.target.style.opacity = "1";
+                        e.target.style.transform = "scale(1.7)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.filter = "grayscale(0)";
+                        e.target.style.opacity = "0.9";
+                        e.target.style.transform = "scale(1.5)";
+                      }}
+                      onError={(e) => {
+                        e.target.src =
+                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect width="200" height="80" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="45"%3ESponzor%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                  </div>
+                ))}
+
+                {/* Duplicate set for seamless loop */}
+                {sponsors.map((sponsor, index) => (
+                  <div
+                    key={`sponsor-duplicate-${index}`}
+                    style={{
+                      flex: "0 0 auto",
+                      margin: "0 3rem",
+                      height: "80px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      src={sponsor}
+                      alt={`Sponzor ${index + 1}`}
+                      style={{
+                        height: "80px",
+                        width: "auto",
+                        maxWidth: "200px",
+                        transform: "scale(1.5)",
+                        objectFit: "contain",
+                        filter: "grayscale(0)",
+                        opacity: 0.9,
+                        transition: "all 0.3s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.filter = "grayscale(0)";
+                        e.target.style.opacity = "1";
+                        e.target.style.transform = "scale(1.7)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.filter = "grayscale(0)";
+                        e.target.style.opacity = "0.9";
+                        e.target.style.transform = "scale(1.5)";
+                      }}
+                      onError={(e) => {
+                        e.target.src =
+                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect width="200" height="80" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="45"%3ESponzor%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
+
+          <style>
+            {`
+              @keyframes scroll {
+                0% {
+                  transform: translateX(0);
+                }
+                100% {
+                  transform: translateX(-50%);
+                }
+              }
+            `}
+          </style>
         </section>
       )}
 
@@ -730,130 +763,98 @@ const Home = () => {
             background:
               "linear-gradient(135deg, rgba(24, 119, 242, 0.05) 0%, rgba(188, 24, 136, 0.05) 100%)",
             padding: "4rem 0",
-            marginTop: "3rem",
+            margin: "3rem 0",
             borderTop: "1px solid var(--border)",
             borderBottom: "1px solid var(--border)",
-            overflow: "hidden",
           }}
         >
           <div className="container">
             <div
               style={{
-                position: "relative",
-                width: "100%",
-                overflow: "hidden",
-                padding: "2rem 0",
+                textAlign: "center",
+                maxWidth: "600px",
+                margin: "0 auto",
               }}
             >
+              <h2
+                className="section-title"
+                style={{ marginBottom: "1.5rem", fontSize: "2rem" }}
+              >
+                Pratite nas
+              </h2>
+              <p
+                style={{
+                  color: "var(--text-primary)",
+                  marginBottom: "2.5rem",
+                  fontSize: "1.1rem",
+                }}
+              >
+                Budite u toku sa najnovijim dešavanjima u svijetu teretnog
+                transporta
+              </p>
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  animation: "scroll 25s linear infinite",
-                  width: "max-content",
+                  gap: "1.5rem",
+                  justifyContent: "center",
+                  flexWrap: "wrap",
                 }}
               >
-                {/* First set of sponsors */}
-                {sponsors.map((sponsor, index) => (
-                  <div
-                    key={`sponsor-${index}`}
-                    style={{
-                      flex: "0 0 auto",
-                      margin: "0 3rem",
-                      height: "80px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <img
-                      src={sponsor}
-                      alt={`Sponzor ${index + 1}`}
-                      style={{
-                        height: "80px",
-                        width: "auto",
-                        maxWidth: "200px",
-                        objectFit: "contain",
-                        filter: "grayscale(0)",
-                        opacity: 0.9,
-                        transition: "all 0.3s",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.filter = "grayscale(0)";
-                        e.target.style.opacity = "1";
-                        e.target.style.transform = "scale(1.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.filter = "grayscale(0)";
-                        e.target.style.opacity = "0.9";
-                        e.target.style.transform = "scale(1)";
-                      }}
-                      onError={(e) => {
-                        e.target.src =
-                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect width="200" height="80" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="45"%3ESponzor%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
-                  </div>
-                ))}
-
-                {/* Duplicate set for seamless loop */}
-                {sponsors.map((sponsor, index) => (
-                  <div
-                    key={`sponsor-duplicate-${index}`}
-                    style={{
-                      flex: "0 0 auto",
-                      margin: "0 3rem",
-                      height: "80px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <img
-                      src={sponsor}
-                      alt={`Sponzor ${index + 1}`}
-                      style={{
-                        height: "80px",
-                        width: "auto",
-                        maxWidth: "200px",
-                        objectFit: "contain",
-                        filter: "grayscale(0)",
-                        opacity: 0.9,
-                        transition: "all 0.3s",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.filter = "grayscale(0)";
-                        e.target.style.opacity = "1";
-                        e.target.style.transform = "scale(1.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.filter = "grayscale(0)";
-                        e.target.style.opacity = "0.9";
-                        e.target.style.transform = "scale(1)";
-                      }}
-                      onError={(e) => {
-                        e.target.src =
-                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect width="200" height="80" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="45"%3ESponzor%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
-                  </div>
-                ))}
+                <a
+                  href="https://facebook.com/teretnjaci.ba"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link hover-grow"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    padding: "1.25rem 2.5rem",
+                    background:
+                      "linear-gradient(135deg, #1877f2 0%, #166fe5 100%)",
+                    color: "white",
+                    borderRadius: "0.75rem",
+                    textDecoration: "none",
+                    fontWeight: 600,
+                    fontSize: "1.1rem",
+                    transition: "all 0.3s",
+                    boxShadow: "0 4px 20px rgba(24, 119, 242, 0.4)",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Facebook size={28} />
+                  Facebook
+                </a>
+                <a
+                  href="https://instagram.com/teretnjaci.ba"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link hover-grow"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    padding: "1.25rem 2.5rem",
+                    background:
+                      "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
+                    color: "white",
+                    borderRadius: "0.75rem",
+                    textDecoration: "none",
+                    fontWeight: 600,
+                    fontSize: "1.1rem",
+                    transition: "all 0.3s",
+                    boxShadow: "0 4px 20px rgba(188, 24, 136, 0.4)",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Instagram size={28} />
+                  Instagram
+                </a>
               </div>
             </div>
           </div>
-
-          <style>
-            {`
-              @keyframes scroll {
-                0% {
-                  transform: translateX(0);
-                }
-                100% {
-                  transform: translateX(-50%);
-                }
-              }
-            `}
-          </style>
         </section>
       )}
     </>
