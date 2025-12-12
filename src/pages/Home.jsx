@@ -357,7 +357,7 @@ const Home = () => {
                 (article, index) => (
                   <div
                     key={article.id}
-                    className="hover-lift"
+
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <ArticleCard article={article} />
@@ -550,7 +550,6 @@ const Home = () => {
                   {articles.map((article, index) => (
                     <div
                       key={article.id}
-                      className="hover-lift"
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <ArticleCard article={article} />
@@ -714,7 +713,6 @@ const Home = () => {
               {popularArticles.map((article, index) => (
                 <div
                   key={article.id}
-                  className="hover-lift"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <ArticleCard article={article} />
