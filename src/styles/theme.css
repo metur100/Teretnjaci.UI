@@ -19,6 +19,8 @@
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
+  --info: #3c8eba;
+  --promo:#aa69ba;
   --shadow: rgba(0, 0, 0, 0.3);
   --gradient: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
 }
@@ -43,6 +45,8 @@
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
+  --info: #3c8eba;
+  --promo:#aa69ba;
   --shadow: rgba(0, 0, 0, 0.1);
   --gradient: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
 }

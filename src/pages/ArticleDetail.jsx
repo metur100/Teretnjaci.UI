@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { articlesApi } from '../services/api';
 import { format } from 'date-fns';
 import { hr } from 'date-fns/locale';
-import { Eye, Calendar, User, AlertTriangle, Clock, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { Eye, Calendar, User, AlertTriangle, HandHelping, Megaphone, Navigation, Newspaper, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 
 const ArticleDetail = () => {
   const { slug } = useParams();
@@ -34,21 +34,33 @@ const ArticleDetail = () => {
 
   const getBadgeClass = (category) => {
     switch (category.toLowerCase()) {
-      case 'dojave':
-        return 'urgent';
-      case 'saobraćaj':
-        return 'warning';
+      case "dojave":
+        return "urgent";
+      case "saobraćaj":
+        return "warning";
+      case "oglasi":
+        return "promo";
+      case "pomoć":
+        return "success";
+      case "vijesti":
+        return "info";
       default:
-        return '';
+        return "";
     }
   };
 
   const getCategoryIcon = (category) => {
     switch (category.toLowerCase()) {
-      case 'dojave':
-        return <AlertTriangle size={14} />;
-      case 'saobraćaj':
-        return <Clock size={14} />;
+      case "dojave":
+        return <AlertTriangle size={12} />;
+      case "saobraćaj":
+        return <Navigation size={12} />;
+      case "vijesti":
+        return <Newspaper size={12} />;
+      case "oglasi":
+        return <Megaphone size={12} />;
+     case "pomoć":
+        return <HandHelping size={12} />;
       default:
         return null;
     }

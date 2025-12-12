@@ -7,11 +7,11 @@ import {
   Eye,
   Calendar,
   User,
-  TrendingUp,
-  Clock,
+  Navigation,
   Facebook,
   Instagram,
   Sparkles,
+  HandHelping,
   Flame,
   Zap,
   AlertTriangle,
@@ -104,9 +104,15 @@ const Home = () => {
   const getBadgeClass = (category) => {
     switch (category.toLowerCase()) {
       case "dojave":
-        return "urgent pulse-animation";
+        return "urgent";
       case "saobraćaj":
-        return "warning glow-animation";
+        return "warning";
+      case "oglasi":
+        return "promo";
+      case "pomoć":
+        return "success";
+      case "vijesti":
+        return "info";
       default:
         return "";
     }
@@ -115,11 +121,15 @@ const Home = () => {
   const getCategoryIcon = (category) => {
     switch (category.toLowerCase()) {
       case "dojave":
-        return <TrendingUp size={14} />;
+        return <AlertTriangle size={17} />;
       case "saobraćaj":
-        return <AlertTriangle size={14} />;
-      case "pomoc":
-        return <Heart size={14} />;
+        return <Navigation size={17} />;
+      case "vijesti":
+        return <Newspaper size={17} />;
+      case "oglasi":
+        return <Megaphone size={17} />;
+     case "pomoć":
+        return <HandHelping size={17} />;
       default:
         return null;
     }
@@ -127,32 +137,16 @@ const Home = () => {
 
   const getCategoryHeaderIcon = (categorySlug) => {
     switch (categorySlug.toLowerCase()) {
-      case "saobracaj":
-        return (
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#ff6b6b"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="5" y="2" width="14" height="20" rx="2" />
-            <circle cx="12" cy="6" r="2" fill="#ef4444" />
-            <circle cx="12" cy="12" r="2" fill="#f59e0b" />
-            <circle cx="12" cy="18" r="2" fill="#22c55e" />
-          </svg>
-        );
-      case "pomoc":
-        return <Heart size={24} style={{ color: "#4ecdc4" }} />;
-      case "dojave":
-        return <Megaphone size={24} style={{ color: "#ffd166" }} />;
       case "vijesti":
-        return <Newspaper size={24} style={{ color: "var(--primary)" }} />;
+        return <Newspaper size={32} style={{ color: "#3c8eba" }} />;
+      case "saobracaj":
+        return <Navigation size={32} style={{ color: "#f59e0b" }} />;
+      case "pomoc":
+        return <HandHelping size={32} style={{ color: "#10b981" }} />;
+      case "dojave":
+        return <AlertTriangle size={32} style={{ color: "#ef4444" }} />;
       case "oglasi":
-        return <FileText size={24} style={{ color: "#06d6a0" }} />;
+        return <Megaphone size={32} style={{ color: "#aa69ba" }} />;
       default:
         return (
           <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />

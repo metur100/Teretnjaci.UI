@@ -1,12 +1,23 @@
 // Header.jsx
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Home, Newspaper, Navigation, AlertTriangle, FileText, Moon, Sun, Lock } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import logo from '../images/teretnjaci.png';
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Search,
+  Home,
+  Newspaper,
+  Navigation,
+  AlertTriangle,
+  Megaphone,
+  Moon,
+  Sun,
+  Lock,
+  HandHelping,
+} from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
+import logo from "../images/teretnjaci.png";
 
 const Header = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
@@ -15,7 +26,7 @@ const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/?search=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery('');
+      setSearchQuery("");
     }
   };
 
@@ -28,50 +39,54 @@ const Header = () => {
         <div className="container">
           <div className="header-content">
             <Link to="/" className="logo">
-              <img 
-                src={logo} 
-                alt="Teretnjaci.ba" 
-                className="logo-image"
-              />
+              <img src={logo} alt="Teretnjaci.ba" className="logo-image" />
             </Link>
 
             <nav className="nav">
-              <Link to="/" className={isActive('/') ? 'active' : ''}>
+              <Link to="/" className={isActive("/") ? "active" : ""}>
                 Početna
               </Link>
-              <Link 
-                to="/kategorija/vijesti" 
-                className={location.pathname.includes('/vijesti') ? 'active' : ''}
+              <Link
+                to="/kategorija/vijesti"
+                className={
+                  location.pathname.includes("/vijesti") ? "active" : ""
+                }
               >
                 Vijesti
               </Link>
-              <Link 
-                to="/kategorija/saobracaj" 
-                className={location.pathname.includes('/saobracaj') ? 'active' : ''}
+              <Link
+                to="/kategorija/saobracaj"
+                className={
+                  location.pathname.includes("/saobracaj") ? "active" : ""
+                }
               >
                 Saobraćaj
               </Link>
-              <Link 
-                to="/kategorija/dojave" 
-                className={location.pathname.includes('/dojave') ? 'active' : ''}
+              <Link
+                to="/kategorija/dojave"
+                className={
+                  location.pathname.includes("/dojave") ? "active" : ""
+                }
               >
                 Dojave
               </Link>
-              <Link 
-                to="/kategorija/pomoc" 
-                className={location.pathname.includes('/pomoc') ? 'active' : ''}
+              <Link
+                to="/kategorija/pomoc"
+                className={location.pathname.includes("/pomoc") ? "active" : ""}
               >
                 Pomoć
               </Link>
-              <Link 
-                to="/kategorija/oglasi" 
-                className={location.pathname.includes('/oglasi') ? 'active' : ''}
+              <Link
+                to="/kategorija/oglasi"
+                className={
+                  location.pathname.includes("/oglasi") ? "active" : ""
+                }
               >
                 Oglasi
               </Link>
             </nav>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <form onSubmit={handleSearch} className="search-bar">
                 <Search size={18} />
                 <input
@@ -86,18 +101,22 @@ const Header = () => {
                 onClick={toggleTheme}
                 className="theme-toggle"
                 aria-label="Toggle theme"
-                title={theme === 'dark' ? 'Prebaci na svijetli režim' : 'Prebaci na tamni režim'}
+                title={
+                  theme === "dark"
+                    ? "Prebaci na svijetli režim"
+                    : "Prebaci na tamni režim"
+                }
               >
-                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
               </button>
-              
+
               {/* Admin Login Icon - Added */}
-              <Link 
-                to="/admin/login" 
+              <Link
+                to="/admin/login"
                 className="theme-toggle"
                 aria-label="Admin login"
                 title="Admin login"
-                style={{ textDecoration: 'none' }}
+                style={{ textDecoration: "none" }}
               >
                 <Lock size={20} />
               </Link>
@@ -109,36 +128,45 @@ const Header = () => {
       {/* Mobile Bottom Navigation */}
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
-          <Link to="/" className={isActive('/') ? 'active' : ''}>
+          <Link to="/" className={isActive("/") ? "active" : ""}>
             <Home />
             <span>Početna</span>
           </Link>
-          <Link 
-            to="/kategorija/vijesti" 
-            className={location.pathname.includes('/vijesti') ? 'active' : ''}
+          <Link
+            to="/kategorija/vijesti"
+            className={location.pathname.includes("/vijesti") ? "active" : ""}
           >
             <Newspaper />
             <span>Vijesti</span>
           </Link>
-          <Link 
-            to="/kategorija/dojave" 
-            className={location.pathname.includes('/dojave') ? 'active' : ''}
-          >
-            <AlertTriangle />
-            <span>Dojave</span>
-          </Link>
-          <Link 
-            to="/kategorija/saobracaj" 
-            className={location.pathname.includes('/saobracaj') ? 'active' : ''}
+          <Link
+            to="/kategorija/saobracaj"
+            className={location.pathname.includes("/saobracaj") ? "active" : ""}
           >
             <Navigation />
             <span>Saobraćaj</span>
           </Link>
-          <Link 
-            to="/kategorija/oglasi" 
-            className={location.pathname.includes('/oglasi') ? 'active' : ''}
+          <Link
+            to="/kategorija/dojave"
+            className={location.pathname.includes("/dojave") ? "active" : ""}
           >
-            <FileText />
+            <AlertTriangle />
+            <span>Dojave</span>
+          </Link>
+
+          <Link
+            to="/kategorija/pomoc"
+            className={location.pathname.includes("/pomoc") ? "active" : ""}
+          >
+            <HandHelping />
+            <span>Pomoć</span>
+          </Link>
+
+          <Link
+            to="/kategorija/oglasi"
+            className={location.pathname.includes("/oglasi") ? "active" : ""}
+          >
+            <Megaphone />
             <span>Oglasi</span>
           </Link>
         </div>

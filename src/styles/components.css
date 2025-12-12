@@ -236,6 +236,15 @@ select.form-control {
   background: var(--success);
 }
 
+.badge.info {
+  background: var(--info);
+}
+
+.badge.promo {
+  background: var(--promo);
+}
+
+
 .status-badge {
   display: inline-flex;
   align-items: center;

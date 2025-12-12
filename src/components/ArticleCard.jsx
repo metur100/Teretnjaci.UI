@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { bs } from "date-fns/locale";
-import { Eye, Calendar, Clock, AlertTriangle } from "lucide-react";
+import { Eye, Calendar, HandHelping, AlertTriangle, Navigation, Newspaper, Megaphone } from "lucide-react";
 import teretnjaci from "../images/teretnjaci.png";
 
 const ArticleCard = ({ article }) => {
@@ -13,6 +13,12 @@ const ArticleCard = ({ article }) => {
         return "urgent";
       case "saobraćaj":
         return "warning";
+      case "oglasi":
+        return "promo";
+      case "pomoć":
+        return "success";
+      case "vijesti":
+        return "info";
       default:
         return "";
     }
@@ -23,7 +29,13 @@ const ArticleCard = ({ article }) => {
       case "dojave":
         return <AlertTriangle size={12} />;
       case "saobraćaj":
-        return <Clock size={12} />;
+        return <Navigation size={12} />;
+      case "vijesti":
+        return <Newspaper size={12} />;
+      case "oglasi":
+        return <Megaphone size={12} />;
+     case "pomoć":
+        return <HandHelping size={12} />;
       default:
         return null;
     }

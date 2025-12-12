@@ -4,16 +4,13 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
 import ArticleCard from "../components/ArticleCard";
 import {
-  AlertTriangle,
-  Heart,
-  TrendingUp,
   Newspaper,
-  FileText,
-  MessageSquare,
+  AlertTriangle,
+  HandHelping,
+  Navigation,
   ChevronLeft,
   ChevronRight,
   Megaphone,
-  TrafficCone,
 } from "lucide-react";
 
 const CategoryPage = () => {
@@ -77,22 +74,15 @@ const CategoryPage = () => {
 
     switch (category.slug.toLowerCase()) {
       case "vijesti":
-        return <Newspaper size={32} style={{ color: "var(--primary)" }} />;
+        return <Newspaper size={32} style={{ color: "#3c8eba" }} />;
       case "saobracaj":
-        return (
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="5" y="2" width="14" height="20" rx="2" />
-            <circle cx="12" cy="6" r="2" fill="#ef4444" />
-            <circle cx="12" cy="12" r="2" fill="#f59e0b" />
-            <circle cx="12" cy="18" r="2" fill="#22c55e" />
-          </svg>
-        );
+        return <Navigation size={32} style={{ color: "#f59e0b" }} />;
       case "pomoc":
-        return <Heart size={32} style={{ color: "#4ecdc4" }} />;
+        return <HandHelping size={32} style={{ color: "#10b981" }} />;
       case "dojave":
-        return <Megaphone size={32} style={{ color: "#ffd166" }} />;
+        return <AlertTriangle size={32} style={{ color: "#ef4444" }} />;
       case "oglasi":
-        return <FileText size={32} style={{ color: "#06d6a0" }} />;
+        return <Megaphone size={32} style={{ color: "#aa69ba" }} />;
       default:
         return <Newspaper size={32} style={{ color: "var(--text-secondary)" }} />;
     }
