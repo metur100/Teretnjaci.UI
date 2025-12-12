@@ -45,7 +45,20 @@ const Home = () => {
   const [currentSponsor, setCurrentSponsor] = useState(0);
 
   const searchQuery = searchParams.get("search");
-  const sponsors = [sponzorImg, sponzor2Img, sponzor3Img, sponzor4Img, sponzor5Img, sponzor6Img, sponzor7Img, sponzor8Img];
+
+  const sponsors = [
+    { img: sponzorImg, url: "https://esplast.ba/" },
+    { img: sponzor2Img, url: "https://www.eurolimun.com/" },
+    { img: sponzor3Img, url: "https://www.febi.com/" },
+    { img: sponzor4Img, url: "https://truckshop.ba/" },
+    { img: sponzor5Img, url: "https://www.tahograf.hr/" },
+    {
+      img: sponzor6Img,
+      url: "https://www.fijavz.com/",
+    },
+    { img: sponzor7Img, url: "https://www.facebook.com/p/Proizvodnja-tekstilnih-proizvoda-Ostrvica-100061079243486/" },
+    { img: sponzor8Img, url: "https://rimes.ba/" },
+  ];
 
   useEffect(() => {
     loadData();
@@ -423,57 +436,9 @@ const Home = () => {
                   width: "max-content",
                 }}
               >
-                {/* First set of sponsors */}
                 {sponsors.map((sponsor, index) => (
                   <div
                     key={`sponsor-${index}`}
-                    style={{
-                      flex: "0 0 auto",
-                      margin: "0 4rem", // Increased margin
-                      width: "350px", // Larger container
-                      height: "180px", // Larger container height
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                    }}
-                  >
-                    <img
-                      src={sponsor}
-                      alt={`Sponzor ${index + 1}`}
-                      style={{
-                        width: "300px", // Large fixed width
-                        height: "auto",
-                        maxHeight: "180px", // Taller max height
-                        objectFit: "contain",
-                        filter: "grayscale(0)",
-                        opacity: 0.9,
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.opacity = "1";
-                        e.target.style.width = "350px"; // Increase width on hover
-                        e.target.style.maxHeight = "200px"; // Increase height on hover
-                        e.target.style.zIndex = "10";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.opacity = "0.9";
-                        e.target.style.width = "300px"; // Back to original width
-                        e.target.style.maxHeight = "180px"; // Back to original height
-                        e.target.style.zIndex = "auto";
-                      }}
-                      onError={(e) => {
-                        e.target.src =
-                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="350" height="180"%3E%3Crect width="350" height="180" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" x="175" y="100"%3ESponzor%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
-                  </div>
-                ))}
-
-                {/* Duplicate set for seamless loop */}
-                {sponsors.map((sponsor, index) => (
-                  <div
-                    key={`sponsor-duplicate-${index}`}
                     style={{
                       flex: "0 0 auto",
                       margin: "0 4rem",
@@ -485,35 +450,109 @@ const Home = () => {
                       position: "relative",
                     }}
                   >
-                    <img
-                      src={sponsor}
-                      alt={`Sponzor ${index + 1}`}
+                    <a
+                      href={sponsor.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{
-                        width: "300px",
-                        height: "auto",
-                        maxHeight: "180px",
-                        objectFit: "contain",
-                        filter: "grayscale(0)",
-                        opacity: 0.9,
-                        transition: "all 0.3s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "100%",
+                        height: "100%",
+                        textDecoration: "none",
                       }}
-                      onMouseEnter={(e) => {
-                        e.target.style.opacity = "1";
-                        e.target.style.width = "350px";
-                        e.target.style.maxHeight = "200px";
-                        e.target.style.zIndex = "10";
+                    >
+                      <img
+                        src={sponsor.img}
+                        alt={`Sponzor ${index + 1}`}
+                        style={{
+                          width: "300px",
+                          height: "auto",
+                          maxHeight: "180px",
+                          objectFit: "contain",
+                          filter: "grayscale(0)",
+                          opacity: 0.9,
+                          transition: "all 0.3s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.opacity = "1";
+                          e.target.style.width = "350px";
+                          e.target.style.maxHeight = "200px";
+                          e.target.style.zIndex = "10";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.opacity = "0.9";
+                          e.target.style.width = "300px";
+                          e.target.style.maxHeight = "180px";
+                          e.target.style.zIndex = "auto";
+                        }}
+                        onError={(e) => {
+                          e.target.src =
+                            'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="350" height="180"%3E%3Crect width="350" height="180" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" x="175" y="100"%3ESponzor%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+                    </a>
+                  </div>
+                ))}
+
+                {sponsors.map((sponsor, index) => (
+                  <div
+                    key={`sponsor-${index}`}
+                    style={{
+                      flex: "0 0 auto",
+                      margin: "0 4rem",
+                      width: "350px",
+                      height: "180px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      position: "relative",
+                    }}
+                  >
+                    <a
+                      href={sponsor.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "100%",
+                        height: "100%",
+                        textDecoration: "none",
                       }}
-                      onMouseLeave={(e) => {
-                        e.target.style.opacity = "0.9";
-                        e.target.style.width = "300px";
-                        e.target.style.maxHeight = "180px";
-                        e.target.style.zIndex = "auto";
-                      }}
-                      onError={(e) => {
-                        e.target.src =
-                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="350" height="180"%3E%3Crect width="350" height="180" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" x="175" y="100"%3ESponzor%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
+                    >
+                      <img
+                        src={sponsor.img}
+                        alt={`Sponzor ${index + 1}`}
+                        style={{
+                          width: "300px",
+                          height: "auto",
+                          maxHeight: "180px",
+                          objectFit: "contain",
+                          filter: "grayscale(0)",
+                          opacity: 0.9,
+                          transition: "all 0.3s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.opacity = "1";
+                          e.target.style.width = "350px";
+                          e.target.style.maxHeight = "200px";
+                          e.target.style.zIndex = "10";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.opacity = "0.9";
+                          e.target.style.width = "300px";
+                          e.target.style.maxHeight = "180px";
+                          e.target.style.zIndex = "auto";
+                        }}
+                        onError={(e) => {
+                          e.target.src =
+                            'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="350" height="180"%3E%3Crect width="350" height="180" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" x="175" y="100"%3ESponzor%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+                    </a>
                   </div>
                 ))}
               </div>
