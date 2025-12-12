@@ -1,34 +1,8 @@
 /* ============================================
-   THEME VARIABLES - DARK MODE (DEFAULT)
+   THEME VARIABLES - LIGHT MODE (DEFAULT)
    ============================================ */
 
 :root,
-[data-theme='dark'] {
-  --primary: #dc2626;
-  --primary-dark: #991b1b;
-  --primary-light: #ef4444;
-  --accent: #f59e0b;
-  --accent-dark: #d97706;
-  --bg-primary: #000000;
-  --bg-secondary: #0b1016;
-  --bg-tertiary: #141921;
-  --bg-card: #000000;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --border: #334155;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --info: #3c8eba;
-  --promo:#aa69ba;
-  --shadow: rgba(0, 0, 0, 0.3);
-  --gradient: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
-}
-
-/* ============================================
-   THEME VARIABLES - LIGHT MODE
-   ============================================ */
-
 [data-theme='light'] {
   --primary: #dc2626;
   --primary-dark: #991b1b;
@@ -52,35 +26,36 @@
 }
 
 /* ============================================
+   THEME VARIABLES - DARK MODE
+   ============================================ */
+
+[data-theme='dark'] {
+  --primary: #dc2626;
+  --primary-dark: #991b1b;
+  --primary-light: #ef4444;
+  --accent: #f59e0b;
+  --accent-dark: #d97706;
+  --bg-primary: #000000;
+  --bg-secondary: #0b1016;
+  --bg-tertiary: #141921;
+  --bg-card: #000000;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --border: #334155;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3c8eba;
+  --promo:#aa69ba;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --gradient: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+}
+
+/* ============================================
    COMPONENT-SPECIFIC THEME OVERRIDES
    ============================================ */
 
-/* Dark Mode - Explicit overrides */
-[data-theme='dark'] .header {
-  background: rgba(0, 0, 0, 0.95) !important;
-  border-bottom-color: #334155 !important;
-}
-
-[data-theme='dark'] .bottom-nav {
-  background: rgba(0, 0, 0, 0.98) !important;
-  border-top-color: #334155 !important;
-}
-
-[data-theme='dark'] .featured-overlay {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.98) 0%, rgba(15, 23, 42, 0.7) 60%, transparent 100%) !important;
-}
-
-[data-theme='dark'] .article-card {
-  background: #1e293b !important;
-  border-color: #334155 !important;
-}
-
-[data-theme='dark'] .admin-sidebar {
-  background: #0b111b !important;
-  border-right-color: #334155 !important;
-}
-
-/* Light Mode - Explicit overrides */
+/* Light Mode - Explicit overrides (DEFAULT) */
 [data-theme='light'] .header {
   background: rgba(255, 255, 255, 0.95) !important;
   border-bottom-color: #cbd5e0 !important;
@@ -163,4 +138,29 @@
 [data-theme='light'] .category-chip {
   background: #ffffff !important;
   border-color: #cbd5e0 !important;
+}
+
+/* Dark Mode - Explicit overrides */
+[data-theme='dark'] .header {
+  background: rgba(0, 0, 0, 0.95) !important;
+  border-bottom-color: #334155 !important;
+}
+
+[data-theme='dark'] .bottom-nav {
+  background: rgba(0, 0, 0, 0.98) !important;
+  border-top-color: #334155 !important;
+}
+
+[data-theme='dark'] .featured-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.98) 0%, rgba(15, 23, 42, 0.7) 60%, transparent 100%) !important;
+}
+
+[data-theme='dark'] .article-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-theme='dark'] .admin-sidebar {
+  background: #0b111b !important;
+  border-right-color: #334155 !important;
 }
