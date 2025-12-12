@@ -407,7 +407,7 @@ const Home = () => {
                 position: "relative",
                 width: "100%",
                 overflow: "hidden",
-                padding: "2rem 0",
+                padding: "3rem 0", // Increased padding
               }}
             >
               <div
@@ -424,39 +424,42 @@ const Home = () => {
                     key={`sponsor-${index}`}
                     style={{
                       flex: "0 0 auto",
-                      margin: "0 3rem",
-                      height: "80px",
+                      margin: "0 4rem", // Increased margin
+                      width: "350px", // Larger container
+                      height: "180px", // Larger container height
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      position: "relative",
                     }}
                   >
                     <img
                       src={sponsor}
                       alt={`Sponzor ${index + 1}`}
                       style={{
-                        height: "80px",
-                        width: "auto",
-                        maxWidth: "200px",
+                        width: "300px", // Large fixed width
+                        height: "auto",
+                        maxHeight: "180px", // Taller max height
                         objectFit: "contain",
                         filter: "grayscale(0)",
-                        transform: "scale(1.5)",
                         opacity: 0.9,
-                        transition: "all 0.3s",
+                        transition: "all 0.3s ease",
                       }}
                       onMouseEnter={(e) => {
-                        e.target.style.filter = "grayscale(0)";
                         e.target.style.opacity = "1";
-                        e.target.style.transform = "scale(1.7)";
+                        e.target.style.width = "350px"; // Increase width on hover
+                        e.target.style.maxHeight = "200px"; // Increase height on hover
+                        e.target.style.zIndex = "10";
                       }}
                       onMouseLeave={(e) => {
-                        e.target.style.filter = "grayscale(0)";
                         e.target.style.opacity = "0.9";
-                        e.target.style.transform = "scale(1.5)";
+                        e.target.style.width = "300px"; // Back to original width
+                        e.target.style.maxHeight = "180px"; // Back to original height
+                        e.target.style.zIndex = "auto";
                       }}
                       onError={(e) => {
                         e.target.src =
-                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect width="200" height="80" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="45"%3ESponzor%3C/text%3E%3C/svg%3E';
+                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="350" height="180"%3E%3Crect width="350" height="180" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" x="175" y="100"%3ESponzor%3C/text%3E%3C/svg%3E';
                       }}
                     />
                   </div>
@@ -468,39 +471,42 @@ const Home = () => {
                     key={`sponsor-duplicate-${index}`}
                     style={{
                       flex: "0 0 auto",
-                      margin: "0 3rem",
-                      height: "80px",
+                      margin: "0 4rem",
+                      width: "350px",
+                      height: "180px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      position: "relative",
                     }}
                   >
                     <img
                       src={sponsor}
                       alt={`Sponzor ${index + 1}`}
                       style={{
-                        height: "80px",
-                        width: "auto",
-                        maxWidth: "200px",
-                        transform: "scale(1.5)",
+                        width: "300px",
+                        height: "auto",
+                        maxHeight: "180px",
                         objectFit: "contain",
                         filter: "grayscale(0)",
                         opacity: 0.9,
-                        transition: "all 0.3s",
+                        transition: "all 0.3s ease",
                       }}
                       onMouseEnter={(e) => {
-                        e.target.style.filter = "grayscale(0)";
                         e.target.style.opacity = "1";
-                        e.target.style.transform = "scale(1.7)";
+                        e.target.style.width = "350px";
+                        e.target.style.maxHeight = "200px";
+                        e.target.style.zIndex = "10";
                       }}
                       onMouseLeave={(e) => {
-                        e.target.style.filter = "grayscale(0)";
                         e.target.style.opacity = "0.9";
-                        e.target.style.transform = "scale(1.5)";
+                        e.target.style.width = "300px";
+                        e.target.style.maxHeight = "180px";
+                        e.target.style.zIndex = "auto";
                       }}
                       onError={(e) => {
                         e.target.src =
-                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="80"%3E%3Crect width="200" height="80" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="45"%3ESponzor%3C/text%3E%3C/svg%3E';
+                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="350" height="180"%3E%3Crect width="350" height="180" fill="%23cbd5e1"/%3E%3Ctext fill="%23475569" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" x="175" y="100"%3ESponzor%3C/text%3E%3C/svg%3E';
                       }}
                     />
                   </div>
@@ -511,19 +517,18 @@ const Home = () => {
 
           <style>
             {`
-              @keyframes scroll {
-                0% {
-                  transform: translateX(0);
-                }
-                100% {
-                  transform: translateX(-50%);
-                }
-              }
-            `}
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}
           </style>
         </section>
       )}
-
       {!searchQuery &&
         categories.map((category, categoryIndex) => {
           const articles = categoryArticles[category.slug] || [];
