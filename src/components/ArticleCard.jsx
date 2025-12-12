@@ -1,27 +1,28 @@
-import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { bs } from 'date-fns/locale';
-import { Eye, Calendar, Clock, AlertTriangle } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import { bs } from "date-fns/locale";
+import { Eye, Calendar, Clock, AlertTriangle } from "lucide-react";
+import teretnjaci from "../images/teretnjaci.png";
 
 const ArticleCard = ({ article }) => {
   const navigate = useNavigate();
 
   const getBadgeClass = (category) => {
     switch (category.toLowerCase()) {
-      case 'dojave':
-        return 'urgent';
-      case 'saobraćaj':
-        return 'warning';
+      case "dojave":
+        return "urgent";
+      case "saobraćaj":
+        return "warning";
       default:
-        return '';
+        return "";
     }
   };
 
   const getCategoryIcon = (category) => {
     switch (category.toLowerCase()) {
-      case 'dojave':
+      case "dojave":
         return <AlertTriangle size={12} />;
-      case 'saobraćaj':
+      case "saobraćaj":
         return <Clock size={12} />;
       default:
         return null;
@@ -29,13 +30,19 @@ const ArticleCard = ({ article }) => {
   };
 
   return (
-    <div className="article-card" onClick={() => navigate(`/clanak/${article.slug}`)}>
+    <div
+      className="article-card"
+      onClick={() => navigate(`/clanak/${article.slug}`)}
+    >
       <img
-        src={article.primaryImageUrl || '/placeholder.jpg'}
+        src={article.primaryImageUrl || "/placeholder.jpg"}
         alt={article.title}
         className="article-image"
         onError={(e) => {
-          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="200"%3E%3Crect fill="%23334155" width="400" height="200"/%3E%3Ctext fill="%23cbd5e1" font-family="sans-serif" font-size="14" text-anchor="middle" x="200" y="100"%3ETeretnjaci.ba%3C/text%3E%3C/svg%3E';
+          e.target.src = teretnjaci;
+          e.target.style.objectFit = "contain";
+          e.target.style.padding = "1rem";
+          e.target.style.background = "var(--bg-secondary)";
         }}
       />
       <div className="article-content">
@@ -47,10 +54,11 @@ const ArticleCard = ({ article }) => {
         {article.summary && (
           <p className="article-summary">{article.summary}</p>
         )}
-        <div className="meta-info" style={{ fontSize: '0.85rem' }}>
+        <div className="meta-info" style={{ fontSize: "0.85rem" }}>
           <span className="meta-item">
             <Calendar size={14} />
-            {article.publishedAt && format(new Date(article.publishedAt), 'd. MMM', { locale: bs })}
+            {article.publishedAt &&
+              format(new Date(article.publishedAt), "d. MMM", { locale: bs })}
           </span>
           <span className="meta-item">
             <Eye size={14} />
