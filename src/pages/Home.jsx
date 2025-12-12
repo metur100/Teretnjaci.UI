@@ -1,4 +1,4 @@
-// Home.jsx - Updated with proper icons
+// Home.jsx - Updated with unified backgrounds
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
@@ -15,7 +15,6 @@ import {
   Flame,
   Zap,
   AlertTriangle,
-  Heart,
   Apple,
   Smartphone,
   Megaphone,
@@ -128,7 +127,7 @@ const Home = () => {
         return <Newspaper size={17} />;
       case "oglasi":
         return <Megaphone size={17} />;
-     case "pomoć":
+      case "pomoć":
         return <HandHelping size={17} />;
       default:
         return null;
@@ -204,7 +203,7 @@ const Home = () => {
                     e.target.src = teretnjaci;
                     e.target.style.objectFit = "contain";
                     e.target.style.padding = "2rem";
-                    e.target.style.background = "var(--bg-secondary)";
+                    e.target.style.background = "var(--bg-primary)";
                   }}
                 />
                 <div
@@ -372,7 +371,7 @@ const Home = () => {
               style={{
                 textAlign: "center",
                 padding: "4rem 1rem",
-                background: "var(--bg-secondary)",
+                background: "var(--bg-primary)",
                 borderRadius: "1rem",
                 border: "2px dashed var(--border)",
               }}
@@ -380,7 +379,7 @@ const Home = () => {
               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>
                 {searchQuery ? "🔍" : "📭"}
               </div>
-              <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>
+              <p style={{ color: "var(--text-primary)", fontSize: "1.1rem" }}>
                 {searchQuery
                   ? "Nema rezultata pretrage."
                   : "Trenutno nema članaka za prikaz."}
@@ -418,7 +417,7 @@ const Home = () => {
               </h2>
               <p
                 style={{
-                  color: "var(--text-secondary)",
+                  color: "var(--text-primary)",
                   marginBottom: "2.5rem",
                   fontSize: "1.1rem",
                 }}
@@ -568,33 +567,14 @@ const Home = () => {
           className="fade-in-up"
           style={{
             background:
-              "linear-gradient(135deg, rgba(78, 205, 196, 0.08) 0%, rgba(85, 98, 112, 0.08) 100%)",
+              "linear-gradient(135deg, rgba(24, 119, 242, 0.05) 0%, rgba(188, 24, 136, 0.05) 100%)",
             padding: "4rem 0",
             margin: "3rem 0",
             borderTop: "1px solid var(--border)",
             borderBottom: "1px solid var(--border)",
-            position: "relative",
-            overflow: "hidden",
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "500px",
-              height: "500px",
-              background:
-                "radial-gradient(circle, rgba(78, 205, 196, 0.1) 0%, transparent 70%)",
-              borderRadius: "50%",
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            className="container"
-            style={{ position: "relative", zIndex: 1 }}
-          >
+          <div className="container">
             <div
               style={{
                 textAlign: "center",
@@ -618,7 +598,7 @@ const Home = () => {
               </h2>
               <p
                 style={{
-                  color: "var(--text-secondary)",
+                  color: "var(--text-primary)",
                   marginBottom: "2.5rem",
                   fontSize: "1.1rem",
                   lineHeight: 1.6,
@@ -713,43 +693,9 @@ const Home = () => {
       {!searchQuery && popularArticles.length > 0 && (
         <section
           className="articles-section fade-in-up"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--bg-secondary) 0%, rgba(74, 85, 104, 0.1) 100%)",
-            padding: "4rem 0",
-            margin: "3rem 0",
-            position: "relative",
-            overflow: "hidden",
-          }}
+          style={{ padding: "4rem 0", margin: "3rem 0" }}
         >
-          <div
-            style={{
-              position: "absolute",
-              top: "-50%",
-              right: "-10%",
-              width: "300px",
-              height: "300px",
-              background:
-                "radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%)",
-              borderRadius: "50%",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-30%",
-              left: "-10%",
-              width: "200px",
-              height: "200px",
-              background:
-                "radial-gradient(circle, rgba(78, 205, 196, 0.1) 0%, transparent 70%)",
-              borderRadius: "50%",
-            }}
-          />
-          <div
-            className="container"
-            style={{ position: "relative", zIndex: 1 }}
-          >
+          <div className="container">
             <div className="section-header">
               <h2 className="section-title">
                 <Flame
@@ -783,19 +729,16 @@ const Home = () => {
         <section
           className="fade-in-up"
           style={{
-            background: "var(--bg-secondary)",
+            background:
+              "linear-gradient(135deg, rgba(24, 119, 242, 0.05) 0%, rgba(188, 24, 136, 0.05) 100%)",
             padding: "4rem 0",
             marginTop: "3rem",
+            borderTop: "1px solid var(--border)",
+            borderBottom: "1px solid var(--border)",
             overflow: "hidden",
           }}
         >
           <div className="container">
-            <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-              <h2 className="section-title" style={{ fontSize: "2rem" }}>
-                Sponzori stranice
-              </h2>
-            </div>
-
             <div
               style={{
                 position: "relative",
@@ -899,57 +842,19 @@ const Home = () => {
                 ))}
               </div>
             </div>
-
-            <div
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
-                height: "1px",
-                margin: "3rem auto 2rem",
-                maxWidth: "600px",
-              }}
-            />
-
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "1rem",
-                lineHeight: 1.8,
-                marginBottom: 0,
-                textAlign: "center",
-              }}
-            >
-              Želite da vaša kompanija bude ovdje?
-              <br />
-              <a
-                href="mailto:kontakt@teretnjaci.ba"
-                style={{
-                  color: "var(--primary)",
-                  textDecoration: "none",
-                  fontWeight: 700,
-                  fontSize: "1.1rem",
-                  transition: "color 0.3s",
-                }}
-                onMouseEnter={(e) => (e.target.style.color = "var(--accent)")}
-                onMouseLeave={(e) => (e.target.style.color = "var(--primary)")}
-              >
-                Kontaktirajte nas
-              </a>{" "}
-              za oglašavanje i saradnju.
-            </p>
           </div>
 
           <style>
             {`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-      `}
+              @keyframes scroll {
+                0% {
+                  transform: translateX(0);
+                }
+                100% {
+                  transform: translateX(-50%);
+                }
+              }
+            `}
           </style>
         </section>
       )}
