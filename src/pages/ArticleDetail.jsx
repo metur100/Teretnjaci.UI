@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { articlesApi } from '../services/api';
 import { format } from 'date-fns';
-import { hr } from 'date-fns/locale';
+import { bs } from 'date-fns/locale';
 import { Eye, Calendar, User, AlertTriangle, HandHelping, Megaphone, Navigation, Newspaper, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 
 const ArticleDetail = () => {
@@ -106,7 +106,7 @@ const ArticleDetail = () => {
           </span>
           <span className="meta-item">
             <Calendar size={18} />
-            {article.publishedAt && format(new Date(article.publishedAt), 'd. MMMM yyyy.', { locale: hr })}
+            {article.publishedAt && format(new Date(article.publishedAt), 'd. MMMM yyyy.', { locale: bs })}
           </span>
           <span className="meta-item">
             <Eye size={18} />

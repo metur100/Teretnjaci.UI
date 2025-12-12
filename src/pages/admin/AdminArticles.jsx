@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { format } from "date-fns";
-import { hr } from "date-fns/locale";
+import { bs } from "date-fns/locale";
 
 // Custom Confirmation Dialog Component
 const ConfirmationDialog = ({
@@ -134,9 +134,9 @@ const AdminArticles = () => {
 
   const formatDate = (article) => {
     if (article.publishedAt) {
-      return format(new Date(article.publishedAt), "d. MMM", { locale: hr });
+      return format(new Date(article.publishedAt), "d. MMM", { locale: bs });
     }
-    return format(new Date(article.createdAt), "d. MMM", { locale: hr });
+    return format(new Date(article.createdAt), "d. MMM", { locale: bs });
   };
 
   const getStatusColor = (isPublished) => {

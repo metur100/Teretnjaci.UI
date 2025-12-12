@@ -22,7 +22,7 @@ import {
   FileText,
 } from "lucide-react";
 import { format } from "date-fns";
-import { hr } from "date-fns/locale";
+import { bs } from "date-fns/locale";
 import sponzorImg from "../images/sponzor.png";
 import sponzor2Img from "../images/sponzor2.png";
 import sponzor3Img from "../images/sponzor3.png";
@@ -277,7 +277,7 @@ const Home = () => {
                       format(
                         new Date(featuredArticle.publishedAt),
                         "d. MMM yyyy",
-                        { locale: hr }
+                        { locale: bs }
                       )}
                   </span>
                   <span
