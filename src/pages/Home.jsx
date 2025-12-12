@@ -26,6 +26,11 @@ import { bs } from "date-fns/locale";
 import sponzorImg from "../images/sponzor.png";
 import sponzor2Img from "../images/sponzor2.png";
 import sponzor3Img from "../images/sponzor3.png";
+import sponzor4Img from "../images/sponzor4.png";
+import sponzor5Img from "../images/sponzor5.png";
+import sponzor6Img from "../images/sponzor6.png";
+import sponzor7Img from "../images/sponzor7.png";
+import sponzor8Img from "../images/sponzor8.png";
 import teretnjaci from "../images/teretnjaci.png";
 
 const Home = () => {
@@ -40,7 +45,7 @@ const Home = () => {
   const [currentSponsor, setCurrentSponsor] = useState(0);
 
   const searchQuery = searchParams.get("search");
-  const sponsors = [sponzorImg, sponzor2Img, sponzor3Img];
+  const sponsors = [sponzorImg, sponzor2Img, sponzor3Img, sponzor4Img, sponzor5Img, sponzor6Img, sponzor7Img, sponzor8Img];
 
   useEffect(() => {
     loadData();
