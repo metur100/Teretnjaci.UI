@@ -1,4 +1,4 @@
-// ArticleDetail.jsx - Updated version
+// ArticleDetail.jsx - Full updated version
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { articlesApi } from '../services/api';
@@ -133,7 +133,7 @@ const ArticleDetail = () => {
         dangerouslySetInnerHTML={{ __html: article.content }}
       />
 
-      <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border)' }}>
+      <div className="article-footer">
         <Link to="/" className="btn btn-secondary">
           <ArrowLeft size={18} />
           Povratak na početnu
