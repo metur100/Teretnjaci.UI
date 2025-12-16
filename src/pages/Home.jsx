@@ -1,4 +1,3 @@
-// Home.jsx - Updated with unified backgrounds
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
@@ -82,94 +81,142 @@ const Home = () => {
           search: searchQuery,
           pageSize: 12,
         });
-        setLatestArticles(response.data.data || response.data);
+        // FIX: Use response.data directly (already normalized)
+        setLatestArticles(response.data || []);
       } else {
         const catResponse = await categoriesApi.getAll();
-        setCategories(catResponse.data.data || catResponse.data);
+        // FIX: catResponse.data is already the normalized array
+        setCategories(catResponse.data || []);
 
         const latestResponse = await articlesApi.getAll({
           page: 1,
           pageSize: 7,
         });
-        setLatestArticles(latestResponse.data.data || latestResponse.data);
+        // FIX: Use normalized response.data
+        setLatestArticles(latestResponse.data || []);
 
         const popularResponse = await articlesApi.getAll({
           page: 1,
           pageSize: 10,
         });
-        const articlesData = popularResponse.data.data || popularResponse.data;
+        const articlesData = popularResponse.data || [];
         const sorted = [...articlesData].sort(
-          (a, b) => b.viewCount - a.viewCount
+          (a, b) => (b.viewCount || b.ViewCount || 0) - (a.viewCount || a.ViewCount || 0)
         );
         setPopularArticles(sorted.slice(0, 6));
 
         const categoryData = {};
-        for (const cat of catResponse.data.data || catResponse.data) {
+        // FIX: categories is already an array from catResponse.data
+        for (const cat of catResponse.data || []) {
           const response = await articlesApi.getAll({
-            category: cat.slug,
+            category: cat.slug || cat.Slug,
             pageSize: 3,
           });
-          categoryData[cat.slug] = response.data.data || response.data;
+          categoryData[cat.slug || cat.Slug] = response.data || [];
         }
         setCategoryArticles(categoryData);
       }
     } catch (error) {
       console.error("Error loading data:", error);
+      // Ensure all states are set to empty arrays on error
+      setLatestArticles([]);
+      setPopularArticles([]);
+      setCategories([]);
+      setCategoryArticles({});
     } finally {
       setLoading(false);
     }
   };
 
+  // FIX: Add null/undefined check and property normalization
   const getBadgeClass = (category) => {
-    switch (category.toLowerCase()) {
-      case "dojave":
-        return "urgent";
-      case "saobraćaj":
-        return "warning";
-      case "oglasi":
-        return "promo";
-      case "pomoć":
-        return "success";
-      case "vijesti":
-        return "info";
-      default:
-        return "";
+    if (!category) return "";
+    
+    try {
+      // Handle both camelCase and PascalCase property names
+      const categoryName = category.toLowerCase 
+        ? category.toLowerCase() 
+        : String(category).toLowerCase();
+      
+      switch (categoryName) {
+        case "dojave":
+          return "urgent";
+        case "saobraćaj":
+        case "saobracaj":
+          return "warning";
+        case "oglasi":
+          return "promo";
+        case "pomoć":
+        case "pomoc":
+          return "success";
+        case "vijesti":
+          return "info";
+        default:
+          return "";
+      }
+    } catch (error) {
+      console.error("Error in getBadgeClass:", error);
+      return "";
     }
   };
 
+  // FIX: Add null/undefined check
   const getCategoryIcon = (category) => {
-    switch (category.toLowerCase()) {
-      case "dojave":
-        return <AlertTriangle size={17} />;
-      case "saobraćaj":
-        return <Navigation size={17} />;
-      case "vijesti":
-        return <Newspaper size={17} />;
-      case "oglasi":
-        return <Megaphone size={17} />;
-      case "pomoć":
-        return <HandHelping size={17} />;
-      default:
-        return null;
+    if (!category) return null;
+    
+    try {
+      const categoryName = String(category).toLowerCase();
+      switch (categoryName) {
+        case "dojave":
+          return <AlertTriangle size={17} />;
+        case "saobraćaj":
+        case "saobracaj":
+          return <Navigation size={17} />;
+        case "vijesti":
+          return <Newspaper size={17} />;
+        case "oglasi":
+          return <Megaphone size={17} />;
+        case "pomoć":
+        case "pomoc":
+          return <HandHelping size={17} />;
+        default:
+          return null;
+      }
+    } catch (error) {
+      console.error("Error in getCategoryIcon:", error);
+      return null;
     }
   };
 
+  // FIX: Add null/undefined check
   const getCategoryHeaderIcon = (categorySlug) => {
-    switch (categorySlug.toLowerCase()) {
-      case "vijesti":
-        return <Newspaper size={32} style={{ color: "#3c8eba" }} />;
-      case "saobracaj":
-        return <Navigation size={32} style={{ color: "#f59e0b" }} />;
-      case "pomoc":
-        return <HandHelping size={32} style={{ color: "#10b981" }} />;
-      case "dojave":
-        return <AlertTriangle size={32} style={{ color: "#ef4444" }} />;
-      case "oglasi":
-        return <Megaphone size={32} style={{ color: "#aa69ba" }} />;
-      default:
-        return (
-          <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />
-        );
+    if (!categorySlug) return (
+      <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />
+    );
+    
+    try {
+      const slug = String(categorySlug).toLowerCase();
+      switch (slug) {
+        case "vijesti":
+          return <Newspaper size={32} style={{ color: "#3c8eba" }} />;
+        case "saobracaj":
+          return <Navigation size={32} style={{ color: "#f59e0b" }} />;
+        case "pomoc":
+          return <HandHelping size={32} style={{ color: "#10b981" }} />;
+        case "dojave":
+          return <AlertTriangle size={32} style={{ color: "#ef4444" }} />;
+        case "oglasi":
+          return <Megaphone size={32} style={{ color: "#aa69ba" }} />;
+        default:
+          return (
+            <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />
+          );
+      }
+    } catch (error) {
+      console.error("Error in getCategoryHeaderIcon:", error);
+      return (
+        <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />
+      );
     }
   };
 
@@ -181,7 +228,19 @@ const Home = () => {
     );
   }
 
-  const featuredArticle = latestArticles[0];
+  // FIX: Check if latestArticles exists and has items
+  const featuredArticle = latestArticles && latestArticles.length > 0 ? latestArticles[0] : null;
+
+  // FIX: Helper function to get property safely
+  const getArticleProperty = (article, prop) => {
+    if (!article) return "";
+    
+    // Try different property name variations
+    return article[prop] || 
+           article[prop.charAt(0).toUpperCase() + prop.slice(1)] || 
+           article[prop.toLowerCase()] || 
+           "";
+  };
 
   return (
     <>
@@ -190,7 +249,7 @@ const Home = () => {
           <div className="container">
             <div
               className="featured-card gradient-border hover-lift"
-              onClick={() => navigate(`/clanak/${featuredArticle.slug}`)}
+              onClick={() => navigate(`/clanak/${getArticleProperty(featuredArticle, 'slug')}`)}
               onMouseEnter={() => setFeaturedHovered(true)}
               onMouseLeave={() => setFeaturedHovered(false)}
               style={{
@@ -210,8 +269,10 @@ const Home = () => {
                 }}
               >
                 <img
-                  src={featuredArticle.primaryImageUrl || "/placeholder.jpg"}
-                  alt={featuredArticle.title}
+                  src={getArticleProperty(featuredArticle, 'primaryImageUrl') || 
+                       getArticleProperty(featuredArticle, 'PrimaryImageUrl') || 
+                       "/placeholder.jpg"}
+                  alt={getArticleProperty(featuredArticle, 'title')}
                   style={{
                     width: "100%",
                     height: "100%",
@@ -243,11 +304,11 @@ const Home = () => {
               <div className="featured-overlay">
                 <span
                   className={`badge ${getBadgeClass(
-                    featuredArticle.categoryName
+                    getArticleProperty(featuredArticle, 'categoryName')
                   )}`}
                 >
-                  {getCategoryIcon(featuredArticle.categoryName)}
-                  {featuredArticle.categoryName}
+                  {getCategoryIcon(getArticleProperty(featuredArticle, 'categoryName'))}
+                  {getArticleProperty(featuredArticle, 'categoryName')}
                 </span>
                 <h2
                   style={{
@@ -261,7 +322,7 @@ const Home = () => {
                       : "translateY(0)",
                   }}
                 >
-                  {featuredArticle.title}
+                  {getArticleProperty(featuredArticle, 'title')}
                 </h2>
                 <div
                   className="meta-info"
@@ -282,7 +343,7 @@ const Home = () => {
                     }}
                   >
                     <User size={16} />
-                    {featuredArticle.authorName}
+                    {getArticleProperty(featuredArticle, 'authorName')}
                   </span>
                   <span
                     className="meta-item"
@@ -293,9 +354,9 @@ const Home = () => {
                     }}
                   >
                     <Calendar size={16} />
-                    {featuredArticle.publishedAt &&
+                    {getArticleProperty(featuredArticle, 'publishedAt') &&
                       format(
-                        new Date(featuredArticle.publishedAt),
+                        new Date(getArticleProperty(featuredArticle, 'publishedAt')),
                         "d. MMM yyyy",
                         { locale: bs }
                       )}
@@ -309,7 +370,7 @@ const Home = () => {
                     }}
                   >
                     <Eye size={16} />
-                    {featuredArticle.viewCount}
+                    {getArticleProperty(featuredArticle, 'viewCount') || 0}
                   </span>
                   {featuredHovered && (
                     <span
@@ -376,7 +437,7 @@ const Home = () => {
               {(searchQuery ? latestArticles : latestArticles.slice(1, 7)).map(
                 (article, index) => (
                   <div
-                    key={article.id}
+                    key={article.id || article.Id || index}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <ArticleCard article={article} />
@@ -427,7 +488,7 @@ const Home = () => {
                 position: "relative",
                 width: "100%",
                 overflow: "hidden",
-                padding: "3rem 0", // Increased padding
+                padding: "3rem 0",
               }}
             >
               <div
@@ -500,7 +561,7 @@ const Home = () => {
 
                 {sponsors.map((sponsor, index) => (
                   <div
-                    key={`sponsor-${index}`}
+                    key={`sponsor-${index}-duplicate`}
                     style={{
                       flex: "0 0 auto",
                       margin: "0 4rem",
@@ -575,14 +636,16 @@ const Home = () => {
           </style>
         </section>
       )}
-      {!searchQuery &&
+      
+      {!searchQuery && categories.length > 0 && (
         categories.map((category, categoryIndex) => {
-          const articles = categoryArticles[category.slug] || [];
+          const categorySlug = category.slug || category.Slug || "";
+          const articles = categoryArticles[categorySlug] || [];
           if (articles.length === 0) return null;
 
           return (
             <section
-              key={category.id}
+              key={category.id || category.Id || categoryIndex}
               className="articles-section fade-in-up"
               style={{ animationDelay: `${categoryIndex * 0.1}s` }}
             >
@@ -605,12 +668,12 @@ const Home = () => {
                       gap: "0.75rem",
                     }}
                   >
-                    {getCategoryHeaderIcon(category.slug)}
-                    {category.name}
+                    {getCategoryHeaderIcon(categorySlug)}
+                    {category.name || category.Name}
                   </h2>
                   <button
                     className="btn btn-secondary hover-grow"
-                    onClick={() => navigate(`/kategorija/${category.slug}`)}
+                    onClick={() => navigate(`/kategorija/${categorySlug}`)}
                     style={{
                       fontSize: "0.875rem",
                       padding: "0.75rem 1.5rem",
@@ -633,7 +696,7 @@ const Home = () => {
                 <div className="articles-grid">
                   {articles.map((article, index) => (
                     <div
-                      key={article.id}
+                      key={article.id || article.Id || index}
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <ArticleCard article={article} />
@@ -643,7 +706,8 @@ const Home = () => {
               </div>
             </section>
           );
-        })}
+        })
+      )}
 
       {!searchQuery && (
         <section
@@ -796,7 +860,7 @@ const Home = () => {
             <div className="articles-grid">
               {popularArticles.map((article, index) => (
                 <div
-                  key={article.id}
+                  key={article.id || article.Id || index}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <ArticleCard article={article} />

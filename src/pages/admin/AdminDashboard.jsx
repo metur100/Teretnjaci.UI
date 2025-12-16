@@ -21,8 +21,13 @@ const AdminDashboard = () => {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     
+    // If we're at /admin without any sub-route, redirect to /admin/clanci
+    if (location.pathname === '/admin') {
+      navigate('/admin/clanci', { replace: true });
+    }
+    
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [location.pathname, navigate]);
 
   const handleLogout = () => {
     logout();
@@ -38,6 +43,16 @@ const AdminDashboard = () => {
       setSidebarOpen(false);
     }
   };
+
+  // Show loading if no user (should be redirected by ProtectedRoute)
+  if (!user) {
+    return (
+      <div className="loading">
+        <div className="spinner"></div>
+        <p>Provjera pristupa...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-dashboard">
@@ -95,8 +110,8 @@ const AdminDashboard = () => {
         {/* User Info */}
         <div className="user-info-card">
           <p className="user-info-label">Prijavljen kao</p>
-          <p className="user-info-name">{user?.fullName}</p>
-          <p className="user-info-role">{user?.role}</p>
+          <p className="user-info-name">{user?.fullName || user?.FullName}</p>
+          <p className="user-info-role">{user?.role || user?.Role}</p>
         </div>
 
         {/* Navigation */}

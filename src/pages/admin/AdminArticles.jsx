@@ -1,4 +1,3 @@
-// AdminArticles.jsx - Updated with debounced search
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { articlesApi } from "../../services/api";
@@ -45,6 +44,14 @@ const ConfirmationDialog = ({
   );
 };
 
+// Helper function to safely get article properties
+const getArticleProperty = (article, prop) => {
+  if (!article) return "";
+  return article[prop] || 
+         article[prop.charAt(0).toUpperCase() + prop.slice(1)] || 
+         article[prop.toLowerCase()] || "";
+};
+
 const AdminArticles = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +59,7 @@ const AdminArticles = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchValue, setSearchValue] = useState(""); // Separate state for input value
+  const [searchValue, setSearchValue] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [articleToDelete, setArticleToDelete] = useState(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -62,46 +69,51 @@ const AdminArticles = () => {
     loadArticles();
   }, [page, filter, searchQuery]);
 
-  // Debounce search - update searchQuery after user stops typing
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchValue !== searchQuery) {
         setSearchQuery(searchValue);
-        setPage(1); // Reset to first page on new search
+        setPage(1);
       }
-    }, 500); // 500ms delay
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchValue, searchQuery]);
 
-  const loadArticles = async () => {
-    try {
-      setLoading(true);
+  // In AdminArticles.jsx loadArticles function:
+const loadArticles = async () => {
+  try {
+    setLoading(true);
 
-      const params = {
-        page,
-        pageSize: 15,
-      };
+    const params = {
+      page,
+      pageSize: 15,
+    };
 
-      if (filter === "published") {
-        params.isPublished = true;
-      } else if (filter === "draft") {
-        params.isPublished = false;
-      }
-
-      if (searchQuery.trim()) {
-        params.search = searchQuery.trim();
-      }
-
-      const response = await articlesApi.getAllAdmin(params);
-      setArticles(response.data.data);
-      setTotalPages(response.data.totalPages);
-    } catch (error) {
-      console.error("Error loading articles:", error);
-    } finally {
-      setLoading(false);
+    if (filter === "published") {
+      params.isPublished = true;
+    } else if (filter === "draft") {
+      params.isPublished = false;
     }
-  };
+
+    if (searchQuery.trim()) {
+      params.search = searchQuery.trim();
+    }
+
+    const response = await articlesApi.getAllAdmin(params);
+    const responseData = response.data || {};  
+    const articlesData = responseData.data || responseData.Data || responseData || [];  
+    setArticles(Array.isArray(articlesData) ? articlesData : []);
+    
+    setTotalPages(responseData.totalPages || responseData.TotalPages || responseData.totalpages || 1);
+  } catch (error) {
+    console.error("Error loading articles:", error);
+    setArticles([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleDeleteClick = (id, title) => {
     setArticleToDelete({ id, title });
@@ -123,7 +135,7 @@ const AdminArticles = () => {
   };
 
   const handleSearchChange = (e) => {
-    setSearchValue(e.target.value); // Only update local state, not searchQuery
+    setSearchValue(e.target.value);
   };
 
   const clearSearch = () => {
@@ -133,10 +145,19 @@ const AdminArticles = () => {
   };
 
   const formatDate = (article) => {
-    if (article.publishedAt) {
-      return format(new Date(article.publishedAt), "d. MMM", { locale: bs });
+    const publishedAt = getArticleProperty(article, 'publishedAt');
+    const createdAt = getArticleProperty(article, 'createdAt');
+    
+    const dateToFormat = publishedAt || createdAt;
+    if (dateToFormat) {
+      try {
+        return format(new Date(dateToFormat), "d. MMM", { locale: bs });
+      } catch (error) {
+        console.error("Error formatting date:", error);
+        return "N/A";
+      }
     }
-    return format(new Date(article.createdAt), "d. MMM", { locale: bs });
+    return "N/A";
   };
 
   const getStatusColor = (isPublished) => {
@@ -194,7 +215,7 @@ const AdminArticles = () => {
             <input
               type="text"
               placeholder="Pretraži članke po naslovu..."
-              value={searchValue} // Use searchValue here
+              value={searchValue}
               onChange={handleSearchChange}
               style={{
                 flex: 1,
@@ -222,7 +243,7 @@ const AdminArticles = () => {
           </div>
         </div>
 
-        {/* Loading State - Keep search bar visible */}
+        {/* Loading State */}
         {loading ? (
           <div style={{ 
             display: 'flex', 
@@ -234,7 +255,6 @@ const AdminArticles = () => {
           </div>
         ) : (
           <>
-            {/* Rest of your UI remains the same... */}
             {/* Filter Tabs - Desktop */}
             <div
               className="filter-tabs desktop-only"
@@ -362,17 +382,192 @@ const AdminArticles = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {articles.map((article) => (
-                        <tr
-                          key={article.id}
-                          className={!article.isPublished ? "draft-row" : ""}
-                        >
-                          <td>
+                      {articles.map((article) => {
+                        const articleId = getArticleProperty(article, 'id');
+                        const articleTitle = getArticleProperty(article, 'title');
+                        const categoryName = getArticleProperty(article, 'categoryName');
+                        const authorName = getArticleProperty(article, 'authorName');
+                        const viewCount = getArticleProperty(article, 'viewCount') || 0;
+                        const isPublished = getArticleProperty(article, 'isPublished') || false;
+                        const slug = getArticleProperty(article, 'slug');
+                        const summary = getArticleProperty(article, 'summary');
+
+                        return (
+                          <tr
+                            key={articleId}
+                            className={!isPublished ? "draft-row" : ""}
+                          >
+                            <td>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "flex-start",
+                                  gap: "0.75rem",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: "8px",
+                                    height: "8px",
+                                    borderRadius: "50%",
+                                    backgroundColor: getStatusColor(isPublished),
+                                    marginTop: "0.5rem",
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <strong
+                                    style={{
+                                      display: "block",
+                                      marginBottom: "0.25rem",
+                                    }}
+                                  >
+                                    {articleTitle}
+                                  </strong>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "1rem",
+                                      flexWrap: "wrap",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        fontSize: "0.875rem",
+                                        color: "var(--text-secondary)",
+                                      }}
+                                    >
+                                      {categoryName}
+                                    </span>
+                                    <span
+                                      style={{
+                                        fontSize: "0.875rem",
+                                        color: "var(--text-secondary)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "0.25rem",
+                                      }}
+                                    >
+                                      <User size={12} />
+                                      {authorName}
+                                    </span>
+                                    <span
+                                      style={{
+                                        fontSize: "0.875rem",
+                                        color: "var(--text-secondary)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "0.25rem",
+                                      }}
+                                    >
+                                      <Eye size={12} />
+                                      {viewCount}
+                                    </span>
+                                  </div>
+                                  {summary && (
+                                    <p
+                                      style={{
+                                        fontSize: "0.875rem",
+                                        color: "var(--text-secondary)",
+                                        marginTop: "0.5rem",
+                                        display: "-webkit-box",
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: "vertical",
+                                        overflow: "hidden",
+                                      }}
+                                    >
+                                      {summary}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span
+                                className="status-badge"
+                                style={{
+                                  backgroundColor: `${getStatusColor(isPublished)}20`,
+                                  color: getStatusColor(isPublished),
+                                }}
+                              >
+                                {getStatusText(isPublished)}
+                              </span>
+                            </td>
+                            <td>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "0.5rem",
+                                }}
+                              >
+                                <Calendar size={14} />
+                                {formatDate(article)}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="table-actions">
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() =>
+                                    navigate(`/admin/clanci/uredi/${articleId}`)
+                                  }
+                                  title="Uredi"
+                                >
+                                  <Edit size={16} />
+                                </button>
+                                <button
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() =>
+                                    handleDeleteClick(articleId, articleTitle)
+                                  }
+                                  title="Obriši"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                                {isPublished && (
+                                  <button
+                                    className="btn btn-outline btn-sm"
+                                    onClick={() =>
+                                      window.open(`/clanak/${slug}`, "_blank")
+                                    }
+                                    title="Pogledaj članak"
+                                  >
+                                    <Eye size={16} />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card List */}
+                <div className="mobile-card-list">
+                  {articles.map((article) => {
+                    const articleId = getArticleProperty(article, 'id');
+                    const articleTitle = getArticleProperty(article, 'title');
+                    const categoryName = getArticleProperty(article, 'categoryName');
+                    const authorName = getArticleProperty(article, 'authorName');
+                    const viewCount = getArticleProperty(article, 'viewCount') || 0;
+                    const isPublished = getArticleProperty(article, 'isPublished') || false;
+                    const slug = getArticleProperty(article, 'slug');
+                    const summary = getArticleProperty(article, 'summary');
+
+                    return (
+                      <div key={articleId} className="mobile-card">
+                        <div className="mobile-card-header">
+                          <div style={{ flex: 1 }}>
                             <div
                               style={{
                                 display: "flex",
-                                alignItems: "flex-start",
-                                gap: "0.75rem",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                                marginBottom: "0.5rem",
                               }}
                             >
                               <div
@@ -380,255 +575,94 @@ const AdminArticles = () => {
                                   width: "8px",
                                   height: "8px",
                                   borderRadius: "50%",
-                                  backgroundColor: getStatusColor(
-                                    article.isPublished
-                                  ),
-                                  marginTop: "0.5rem",
+                                  backgroundColor: getStatusColor(isPublished),
                                   flexShrink: 0,
                                 }}
                               />
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <strong
-                                  style={{
-                                    display: "block",
-                                    marginBottom: "0.25rem",
-                                  }}
-                                >
-                                  {article.title}
-                                </strong>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "1rem",
-                                    flexWrap: "wrap",
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      fontSize: "0.875rem",
-                                      color: "var(--text-secondary)",
-                                    }}
-                                  >
-                                    {article.categoryName}
-                                  </span>
-                                  <span
-                                    style={{
-                                      fontSize: "0.875rem",
-                                      color: "var(--text-secondary)",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "0.25rem",
-                                    }}
-                                  >
-                                    <User size={12} />
-                                    {article.authorName}
-                                  </span>
-                                  <span
-                                    style={{
-                                      fontSize: "0.875rem",
-                                      color: "var(--text-secondary)",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "0.25rem",
-                                    }}
-                                  >
-                                    <Eye size={12} />
-                                    {article.viewCount}
-                                  </span>
-                                </div>
-                                {article.summary && (
-                                  <p
-                                    style={{
-                                      fontSize: "0.875rem",
-                                      color: "var(--text-secondary)",
-                                      marginTop: "0.5rem",
-                                      display: "-webkit-box",
-                                      WebkitLineClamp: 2,
-                                      WebkitBoxOrient: "vertical",
-                                      overflow: "hidden",
-                                    }}
-                                  >
-                                    {article.summary}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span
-                              className="status-badge"
-                              style={{
-                                backgroundColor: `${getStatusColor(
-                                  article.isPublished
-                                )}20`,
-                                color: getStatusColor(article.isPublished),
-                              }}
-                            >
-                              {getStatusText(article.isPublished)}
-                            </span>
-                          </td>
-                          <td>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "0.5rem",
-                              }}
-                            >
-                              <Calendar size={14} />
-                              {formatDate(article)}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="table-actions">
-                              <button
-                                className="btn btn-secondary btn-sm"
-                                onClick={() =>
-                                  navigate(`/admin/clanci/uredi/${article.id}`)
-                                }
-                                title="Uredi"
+                              <span
+                                className="status-badge"
+                                style={{
+                                  fontSize: "0.75rem",
+                                  padding: "0.25rem 0.5rem",
+                                  backgroundColor: `${getStatusColor(isPublished)}20`,
+                                  color: getStatusColor(isPublished),
+                                }}
                               >
-                                <Edit size={16} />
-                              </button>
-                              <button
-                                className="btn btn-danger btn-sm"
-                                onClick={() =>
-                                  handleDeleteClick(article.id, article.title)
-                                }
-                                title="Obriši"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                              {article.isPublished && (
-                                <button
-                                  className="btn btn-outline btn-sm"
-                                  onClick={() =>
-                                    window.open(`/clanak/${article.slug}`, "_blank")
-                                  }
-                                  title="Pogledaj članak"
-                                >
-                                  <Eye size={16} />
-                                </button>
-                              )}
+                                {getStatusText(isPublished)}
+                              </span>
                             </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile Card List */}
-                <div className="mobile-card-list">
-                  {articles.map((article) => (
-                    <div key={article.id} className="mobile-card">
-                      <div className="mobile-card-header">
-                        <div style={{ flex: 1 }}>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "0.5rem",
-                              marginBottom: "0.5rem",
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: "8px",
-                                height: "8px",
-                                borderRadius: "50%",
-                                backgroundColor: getStatusColor(
-                                  article.isPublished
-                                ),
-                                flexShrink: 0,
-                              }}
-                            />
-                            <span
-                              className="status-badge"
-                              style={{
-                                fontSize: "0.75rem",
-                                padding: "0.25rem 0.5rem",
-                                backgroundColor: `${getStatusColor(
-                                  article.isPublished
-                                )}20`,
-                                color: getStatusColor(article.isPublished),
-                              }}
-                            >
-                              {getStatusText(article.isPublished)}
-                            </span>
+                            <h3 className="mobile-card-title">{articleTitle}</h3>
+                            {summary && (
+                              <p
+                                style={{
+                                  fontSize: "0.875rem",
+                                  color: "var(--text-secondary)",
+                                  marginTop: "0.5rem",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {summary}
+                              </p>
+                            )}
                           </div>
-                          <h3 className="mobile-card-title">{article.title}</h3>
-                          {article.summary && (
-                            <p
-                              style={{
-                                fontSize: "0.875rem",
-                                color: "var(--text-secondary)",
-                                marginTop: "0.5rem",
-                                display: "-webkit-box",
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical",
-                                overflow: "hidden",
-                              }}
+                        </div>
+
+                        <div className="mobile-card-details">
+                          <span>
+                            <FileText size={14} />
+                            {categoryName}
+                          </span>
+                          <span>
+                            <User size={14} />
+                            {authorName}
+                          </span>
+                          <span>
+                            <Calendar size={14} />
+                            {formatDate(article)}
+                          </span>
+                          <span>
+                            <Eye size={14} />
+                            {viewCount}
+                          </span>
+                        </div>
+
+                        <div className="mobile-card-actions">
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() =>
+                              navigate(`/admin/clanci/uredi/${articleId}`)
+                            }
+                          >
+                            <Edit size={16} />
+                            Uredi
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() =>
+                              handleDeleteClick(articleId, articleTitle)
+                            }
+                          >
+                            <Trash2 size={16} />
+                            Obriši
+                          </button>
+                          {isPublished && (
+                            <button
+                              className="btn btn-outline"
+                              onClick={() =>
+                                window.open(`/clanak/${slug}`, "_blank")
+                              }
                             >
-                              {article.summary}
-                            </p>
+                              <Eye size={16} />
+                              Pogledaj
+                            </button>
                           )}
                         </div>
                       </div>
-
-                      <div className="mobile-card-details">
-                        <span>
-                          <FileText size={14} />
-                          {article.categoryName}
-                        </span>
-                        <span>
-                          <User size={14} />
-                          {article.authorName}
-                        </span>
-                        <span>
-                          <Calendar size={14} />
-                          {formatDate(article)}
-                        </span>
-                        <span>
-                          <Eye size={14} />
-                          {article.viewCount}
-                        </span>
-                      </div>
-
-                      <div className="mobile-card-actions">
-                        <button
-                          className="btn btn-secondary"
-                          onClick={() =>
-                            navigate(`/admin/clanci/uredi/${article.id}`)
-                          }
-                        >
-                          <Edit size={16} />
-                          Uredi
-                        </button>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() =>
-                            handleDeleteClick(article.id, article.title)
-                          }
-                        >
-                          <Trash2 size={16} />
-                          Obriši
-                        </button>
-                        {article.isPublished && (
-                          <button
-                            className="btn btn-outline"
-                            onClick={() =>
-                              window.open(`/clanak/${article.slug}`, "_blank")
-                            }
-                          >
-                            <Eye size={16} />
-                            Pogledaj
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {totalPages > 1 && (
