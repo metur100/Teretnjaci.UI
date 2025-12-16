@@ -226,7 +226,6 @@ const CategoryPage = () => {
                 {articles.map((article, index) => (
                   <div
                     key={article.id || article.Id || index}
-                    className="hover-lift"
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     <ArticleCard article={article} />
