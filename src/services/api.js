@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  //baseURL: 'https://api.teretnjaci.ba/api',
+  baseURL: 'https://api.teretnjaci.ba/api',
   //baseURL: 'https://teretnjaci.runasp.net/api',
   //baseURL: 'https://localhost:3103/api',
-  baseURL: 'http://localhost:5000/api',
+  //baseURL: 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json'
   }
