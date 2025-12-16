@@ -35,8 +35,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Use authApi.login which handles the API call
       const response = await authApi.login({ username, password });
-      console.log('Login API response:', response);
-      
+ 
       // Handle different response structures from your backend
       const responseData = response.data || {};
       
@@ -69,9 +68,6 @@ export const AuthProvider = ({ children }) => {
         token = responseData.token || responseData.Token;
         userData = responseData.user || responseData.User || responseData;
       }
-      
-      console.log('Extracted token:', token);
-      console.log('Extracted user:', userData);
       
       if (!token || !userData) {
         console.error('Missing token or user data in response:', responseData);

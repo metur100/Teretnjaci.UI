@@ -30,17 +30,11 @@ const AdminLogin = () => {
     setError('');
     setLoading(true);
 
-    console.log('Login attempt with:', { username, password }); // Add debug
-    
     const result = await login(username, password);
-    
-    console.log('Login result:', result); // Add debug
     
     if (result.success) {
       console.log('Login successful, should redirect...');
-      // The useEffect will handle redirect when user state updates
     } else {
-      console.log('Login failed with message:', result.message);
       setError(result.message);
       setLoading(false);
     }
