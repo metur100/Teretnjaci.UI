@@ -33,7 +33,6 @@ const AdminLogin = () => {
     const result = await login(username, password);
     
     if (result.success) {
-      console.log('Login successful, should redirect...');
     } else {
       setError(result.message);
       setLoading(false);

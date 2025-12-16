@@ -70,7 +70,6 @@ const loadUsers = async () => {
       for (const key of allKeys) {
         if (Array.isArray(responseData[key])) {
           usersData = responseData[key];
-          console.log(`Found users array in key: ${key}`);
           break;
         }
       }

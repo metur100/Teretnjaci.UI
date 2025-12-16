@@ -154,9 +154,7 @@ const AdminArticleForm = () => {
       
       setArticleId(newArticleId);
       setIsAutoSaved(true);
-      
-      console.log("Article auto-saved as draft with ID:", newArticleId);
-      
+   
       return newArticleId;
     } catch (error) {
       console.error("Error auto-saving article:", error);
@@ -196,9 +194,7 @@ const imageHandler = useCallback(() => {
       
       const response = await imagesApi.uploadInline(file);
       const responseData = response.data || {};
-      
-      console.log('Inline image upload response:', responseData);
-      
+
       // Check for success (handle different response structures)
       const isSuccess = responseData.Success === true || 
                        responseData.success === true ||
@@ -303,8 +299,6 @@ const imageHandler = useCallback(() => {
       setLoading(true);
       const response = await articlesApi.getById(id);
       const article = response.data || {};
-
-      console.log("Loaded article:", article);
 
       setFormData({
         title: article.title || article.Title || "",
@@ -452,9 +446,7 @@ const handleImageUpload = async (e) => {
     try {
       const response = await imagesApi.upload(currentArticleId, file);
       const responseData = response.data || {};
-      
-      console.log('Image upload response:', responseData);
-      
+
       // The backend might return the image data directly OR wrapped in a Data property
       // Check if we have an image object with an ID
       const imageData = responseData.Data || responseData.data || responseData;
@@ -468,7 +460,6 @@ const handleImageUpload = async (e) => {
         };
         
         uploadedImages.push(uploadedImage);
-        console.log('Successfully processed image:', uploadedImage);
       } else {
         // Check if there's an error in the response
         const errorMsg = responseData.Message || responseData.message || 
@@ -498,7 +489,6 @@ const handleImageUpload = async (e) => {
         );
         if (!exists) {
           newImages.push(newImage);
-          console.log('Added new image to state:', newImage);
         }
       });
       return newImages;
