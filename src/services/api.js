@@ -337,30 +337,27 @@ export const imagesApi = {
     }
   },
   
-  uploadInline: async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await apiCall('post', '/images/upload-inline', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 30000,
-      });
-      
-      return {
-        ...response,
-        data: extractData(response, false)
-      };
-    } catch (error) {
-      return {
-        success: false,
-        data: null,
-        message: error.response?.data?.message || 'Greška pri učitavanju slike'
-      };
-    }
-  },
+uploadInline: async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file); // Change from 'image' to 'file'
+    
+    const response = await apiCall('post', '/images/upload-inline', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 30000,
+    });
+    
+    return response;
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: error.response?.data?.message || 'Greška pri učitavanju slike'
+    };
+  }
+},
   
   setPrimary: async (imageId) => {
     try {

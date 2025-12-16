@@ -169,59 +169,74 @@ const AdminArticleForm = () => {
   };
 
   // Image handler for Quill editor
-  const imageHandler = useCallback(() => {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
+const imageHandler = useCallback(() => {
+  const input = document.createElement('input');
+  input.setAttribute('type', 'file');
+  input.setAttribute('accept', 'image/*');
+  input.click();
 
-    input.onchange = async () => {
-      const file = input.files[0];
-      if (!file) return;
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
 
-      const maxSize = 10 * 1024 * 1024;
-      if (file.size > maxSize) {
-        showError('Slika je prevelika. Maksimalna veličina je 10MB');
-        return;
-      }
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      showError('Slika je prevelika. Maksimalna veličina je 10MB');
+      return;
+    }
 
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        showError('Nepodržan format slike. Dozvoljeni formati: JPEG, PNG, GIF, WebP');
-        return;
-      }
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showError('Nepodržan format slike. Dozvoljeni formati: JPEG, PNG, GIF, WebP');
+      return;
+    }
 
-      try {
-        setUploading(true);
+    try {
+      setUploading(true);
+      
+      const response = await imagesApi.uploadInline(file);
+      const responseData = response.data || {};
+      
+      console.log('Inline image upload response:', responseData);
+      
+      // Check for success (handle different response structures)
+      const isSuccess = responseData.Success === true || 
+                       responseData.success === true ||
+                       response.status === 200 || 
+                       response.status === 201;
+      
+      if (isSuccess) {
+        // Extract URL from response
+        const imageData = responseData.Data || responseData.data || responseData;
+        const imageUrl = imageData.Url || imageData.url || imageData.FilePath || imageData.filePath || '';
         
-        const response = await imagesApi.uploadInline(file);
-        const responseData = response.data || {};
-        
-        if (responseData.success) {
-          const imageUrl = responseData.data?.url || responseData.data?.Url || '';
+        if (imageUrl && quillRef.current) {
+          const quill = quillRef.current.getEditor();
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', imageUrl);
+          quill.setSelection(range.index + 1);
           
-          if (imageUrl && quillRef.current) {
-            const quill = quillRef.current.getEditor();
-            const range = quill.getSelection(true);
-            quill.insertEmbed(range.index, 'image', imageUrl);
-            quill.setSelection(range.index + 1);
-            
-            showSuccess('Slika je uspješno dodana u sadržaj');
-          } else {
-            showError('Greška pri učitavanju slike - nedostaje URL');
-          }
+          showSuccess('Slika je uspješno dodana u sadržaj');
         } else {
-          showError('Greška pri učitavanju slike');
+          console.error('No image URL in response:', imageData);
+          showError('Greška pri učitavanju slike - nedostaje URL');
         }
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        const errorMessage = error.response?.data?.message || error.response?.data?.Message || error.message || 'Nepoznata greška';
-        showError('Greška pri učitavanju slike: ' + errorMessage);
-      } finally {
-        setUploading(false);
+      } else {
+        const errorMsg = responseData.Message || responseData.message || 'Greška pri učitavanju slike';
+        showError(errorMsg);
       }
-    };
-  }, []);
+    } catch (error) {
+      console.error('Error uploading inline image:', error);
+      const errorMessage = error.response?.data?.Message || 
+                          error.response?.data?.message || 
+                          error.message || 
+                          'Nepoznata greška';
+      showError('Greška pri učitavanju slike: ' + errorMessage);
+    } finally {
+      setUploading(false);
+    }
+  };
+}, []);
 
   // Quill modules configuration
   const modules = {
