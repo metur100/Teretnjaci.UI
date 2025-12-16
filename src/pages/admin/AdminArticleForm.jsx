@@ -440,13 +440,11 @@ const handleImageUpload = async (e) => {
       
       console.log('Image upload response:', responseData);
       
-      // Check if response indicates success (use PascalCase 'Success' not 'success')
-      const isSuccess = responseData.Success === true || responseData.success === true;
+      // The backend might return the image data directly OR wrapped in a Data property
+      // Check if we have an image object with an ID
+      const imageData = responseData.Data || responseData.data || responseData;
       
-      if (isSuccess) {
-        // Use PascalCase 'Data' not 'data'
-        const imageData = responseData.Data || responseData.data || responseData;
-        
+      if (imageData && (imageData.Id || imageData.id)) {
         const uploadedImage = {
           id: imageData.Id || imageData.id,
           fileName: imageData.FileName || imageData.fileName || file.name,
@@ -454,16 +452,10 @@ const handleImageUpload = async (e) => {
           isPrimary: imageData.IsPrimary || imageData.isPrimary || false
         };
         
-        // Only add if we have an ID
-        if (uploadedImage.id) {
-          uploadedImages.push(uploadedImage);
-          console.log('Successfully processed image:', uploadedImage);
-        } else {
-          console.warn('Image uploaded but no ID returned:', imageData);
-          // Don't show error here, just log it
-        }
+        uploadedImages.push(uploadedImage);
+        console.log('Successfully processed image:', uploadedImage);
       } else {
-        // Try to get error message with different property names
+        // Check if there's an error in the response
         const errorMsg = responseData.Message || responseData.message || 
                         responseData.error || responseData.Error || 
                         'Nepoznata greška';
