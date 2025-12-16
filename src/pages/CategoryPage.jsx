@@ -1,4 +1,3 @@
-// CategoryPage.jsx - Updated version with spacing
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
@@ -33,30 +32,36 @@ const CategoryPage = () => {
     try {
       setLoading(true);
 
+      // Get categories using the fixed api.js
       const categoriesResponse = await categoriesApi.getAll();
-      const categoriesData =
-        categoriesResponse.data.data || categoriesResponse.data;
-      const foundCategory = categoriesData.find((cat) => cat.slug === slug);
-      setCategory(foundCategory);
+      const categoriesData = categoriesResponse.data || [];
+      
+      const foundCategory = categoriesData.find((cat) => 
+        (cat.slug || cat.Slug) === slug
+      );
+      setCategory(foundCategory || null);
 
+      // Get articles
       const response = await articlesApi.getAll({
         category: slug,
         page: currentPage,
         pageSize: pageSize,
       });
 
-      const responseData = response.data.data || response.data;
-      const paginationData = response.data.pagination || {};
+      const responseData = response.data || [];
+      const paginationData = response.pagination || {};
 
       setArticles(Array.isArray(responseData) ? responseData : []);
-      setTotalArticles(paginationData.totalItems || responseData.length);
+      setTotalArticles(paginationData.totalItems || responseData.length || 0);
       setTotalPages(
         paginationData.totalPages ||
-          Math.ceil((paginationData.totalItems || responseData.length) / pageSize) ||
+          Math.ceil((paginationData.totalItems || responseData.length || 0) / pageSize) ||
           1
       );
     } catch (error) {
       console.error("Error loading category data:", error);
+      setArticles([]);
+      setCategory(null);
     } finally {
       setLoading(false);
     }
@@ -72,38 +77,50 @@ const CategoryPage = () => {
   const getCategoryIcon = () => {
     if (!category) return null;
 
-    switch (category.slug.toLowerCase()) {
-      case "vijesti":
-        return <Newspaper size={32} style={{ color: "#3c8eba" }} />;
-      case "saobracaj":
-        return <Navigation size={32} style={{ color: "#f59e0b" }} />;
-      case "pomoc":
-        return <HandHelping size={32} style={{ color: "#10b981" }} />;
-      case "dojave":
-        return <AlertTriangle size={32} style={{ color: "#ef4444" }} />;
-      case "oglasi":
-        return <Megaphone size={32} style={{ color: "#aa69ba" }} />;
-      default:
-        return <Newspaper size={32} style={{ color: "var(--text-secondary)" }} />;
+    const categorySlug = (category.slug || category.Slug || "").toLowerCase();
+    try {
+      switch (categorySlug) {
+        case "vijesti":
+          return <Newspaper size={32} style={{ color: "#3c8eba" }} />;
+        case "saobracaj":
+          return <Navigation size={32} style={{ color: "#f59e0b" }} />;
+        case "pomoc":
+          return <HandHelping size={32} style={{ color: "#10b981" }} />;
+        case "dojave":
+          return <AlertTriangle size={32} style={{ color: "#ef4444" }} />;
+        case "oglasi":
+          return <Megaphone size={32} style={{ color: "#aa69ba" }} />;
+        default:
+          return <Newspaper size={32} style={{ color: "var(--text-secondary)" }} />;
+      }
+    } catch (error) {
+      console.error("Error in getCategoryIcon:", error);
+      return <Newspaper size={32} style={{ color: "var(--text-secondary)" }} />;
     }
   };
 
   const getCategoryDescription = () => {
     if (!category) return "";
 
-    switch (category.slug.toLowerCase()) {
-      case "saobracaj":
-        return "Aktuelne informacije o saobraćajnoj situaciji, zatvaranjima puteva, radovima na putevima i važnim dojavama za vozače teretnih vozila.";
-      case "pomoc":
-        return "Potrebna Vam je pomoć na putu ili želite pomoći drugima? Ovdje možete pronaći sve relevantne informacije, kontakte i objave za pomoć u nevolji.";
-      case "dojave":
-        return "Najnovije dojave iz terena, informacije o kontrolama, graničnim prelazima i važne obavijesti za vozače teretnjaka.";
-      case "vijesti":
-        return "Sve aktuelne vijesti iz svijeta transporta, logistike, zakonskih promjena i događaja od značaja za teretni transport.";
-      case "oglasi":
-        return "Oglasi za prodaju i kupovinu teretnih vozila, traženje posla, transportnih usluga i sve ostalo što se tiče teretnog transporta.";
-      default:
-        return `Svi članci i objave iz kategorije ${category.name}`;
+    const categorySlug = (category.slug || category.Slug || "").toLowerCase();
+    try {
+      switch (categorySlug) {
+        case "saobracaj":
+          return "Aktuelne informacije o saobraćajnoj situaciji, zatvaranjima puteva, radovima na putevima i važnim dojavama za vozače teretnih vozila.";
+        case "pomoc":
+          return "Potrebna Vam je pomoć na putu ili želite pomoći drugima? Ovdje možete pronaći sve relevantne informacije, kontakte i objave za pomoć u nevolji.";
+        case "dojave":
+          return "Najnovije dojave iz terena, informacije o kontrolama, graničnim prelazima i važne obavijesti za vozače teretnjaka.";
+        case "vijesti":
+          return "Sve aktuelne vijesti iz svijeta transporta, logistike, zakonskih promjena i događaja od značaja za teretni transport.";
+        case "oglasi":
+          return "Oglasi za prodaju i kupovinu teretnih vozila, traženje posla, transportnih usluga i sve ostalo što se tiče teretnog transporta.";
+        default:
+          return `Svi članci i objave iz kategorije ${category.name || category.Name || "ova"}`;
+      }
+    } catch (error) {
+      console.error("Error in getCategoryDescription:", error);
+      return `Svi članci i objave iz kategorije ${category.name || category.Name || "ova"}`;
     }
   };
 
@@ -162,7 +179,7 @@ const CategoryPage = () => {
                 fontWeight: 700,
               }}
             >
-              {category.name}
+              {category.name || category.Name}
             </h1>
           </div>
           <p
@@ -208,7 +225,7 @@ const CategoryPage = () => {
               <div className="articles-grid">
                 {articles.map((article, index) => (
                   <div
-                    key={article.id}
+                    key={article.id || article.Id || index}
                     className="hover-lift"
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
@@ -304,7 +321,7 @@ const CategoryPage = () => {
                 Nema članaka u ovoj kategoriji
               </h2>
               <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem" }}>
-                Trenutno nema objavljenih članaka u kategoriji "{category.name}
+                Trenutno nema objavljenih članaka u kategoriji "{category.name || category.Name}
                 ".
               </p>
             </div>

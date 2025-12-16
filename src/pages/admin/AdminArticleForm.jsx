@@ -73,7 +73,7 @@ const AdminArticleForm = () => {
     title: "",
     content: "",
     categoryId: "",
-    isPublished: false, // Default to draft
+    isPublished: false,
   });
 
   const [categories, setCategories] = useState([]);
@@ -84,7 +84,6 @@ const AdminArticleForm = () => {
   const [initialLoad, setInitialLoad] = useState(false);
   const [isAutoSaved, setIsAutoSaved] = useState(false);
 
-  // Dialog states
   const [showDeleteImageDialog, setShowDeleteImageDialog] = useState(false);
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
@@ -129,9 +128,8 @@ const AdminArticleForm = () => {
     setShowValidationDialog(true);
   };
 
-  // Auto-save article as draft (for image uploads before article creation)
+  // Auto-save article as draft
   const autoSaveArticle = async () => {
-    // Validate minimum requirements
     if (!formData.title.trim()) {
       showValidationError("Molimo unesite naslov članka prije dodavanja slika");
       return null;
@@ -145,15 +143,14 @@ const AdminArticleForm = () => {
     try {
       setLoading(true);
       
-      // Create article as draft
       const articleData = {
         ...formData,
-        content: formData.content || '<p><br></p>', // Minimum content
-        isPublished: false // Always draft for auto-save
+        content: formData.content || '<p><br></p>',
+        isPublished: false
       };
 
       const response = await articlesApi.create(articleData);
-      const newArticleId = response.data.data.id;
+      const newArticleId = response.data?.id || response.data?.Id;
       
       setArticleId(newArticleId);
       setIsAutoSaved(true);
@@ -163,7 +160,7 @@ const AdminArticleForm = () => {
       return newArticleId;
     } catch (error) {
       console.error("Error auto-saving article:", error);
-      const errorMessage = error.response?.data?.message || error.message || 'Nepoznata greška';
+      const errorMessage = error.response?.data?.message || error.response?.data?.Message || error.message || 'Nepoznata greška';
       showError("Greška pri čuvanju članka: " + errorMessage);
       return null;
     } finally {
@@ -171,41 +168,49 @@ const AdminArticleForm = () => {
     }
   };
 
-  // Image handler for Quill editor (inline images)
-  const imageHandler = useCallback(() => {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
+  // Image handler for Quill editor
+const imageHandler = useCallback(() => {
+  const input = document.createElement('input');
+  input.setAttribute('type', 'file');
+  input.setAttribute('accept', 'image/*');
+  input.click();
 
-    input.onchange = async () => {
-      const file = input.files[0];
-      if (!file) return;
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
 
-      // Validate file size (10MB max)
-      const maxSize = 10 * 1024 * 1024;
-      if (file.size > maxSize) {
-        showError('Slika je prevelika. Maksimalna veličina je 10MB');
-        return;
-      }
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      showError('Slika je prevelika. Maksimalna veličina je 10MB');
+      return;
+    }
 
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        showError('Nepodržan format slike. Dozvoljeni formati: JPEG, PNG, GIF, WebP');
-        return;
-      }
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showError('Nepodržan format slike. Dozvoljeni formati: JPEG, PNG, GIF, WebP');
+      return;
+    }
 
-      try {
-        setUploading(true);
+    try {
+      setUploading(true);
+      
+      const response = await imagesApi.uploadInline(file);
+      const responseData = response.data || {};
+      
+      console.log('Inline image upload response:', responseData);
+      
+      // Check for success (handle different response structures)
+      const isSuccess = responseData.Success === true || 
+                       responseData.success === true ||
+                       response.status === 200 || 
+                       response.status === 201;
+      
+      if (isSuccess) {
+        // Extract URL from response
+        const imageData = responseData.Data || responseData.data || responseData;
+        const imageUrl = imageData.Url || imageData.url || imageData.FilePath || imageData.filePath || '';
         
-        // Upload to ImgBB (doesn't require articleId)
-        const response = await imagesApi.uploadInline(file);
-        
-        if (response.data.success) {
-          const imageUrl = response.data.data.url;
-          
-          // Insert image into editor
+        if (imageUrl && quillRef.current) {
           const quill = quillRef.current.getEditor();
           const range = quill.getSelection(true);
           quill.insertEmbed(range.index, 'image', imageUrl);
@@ -213,17 +218,25 @@ const AdminArticleForm = () => {
           
           showSuccess('Slika je uspješno dodana u sadržaj');
         } else {
-          showError('Greška pri učitavanju slike');
+          console.error('No image URL in response:', imageData);
+          showError('Greška pri učitavanju slike - nedostaje URL');
         }
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        const errorMessage = error.response?.data?.message || error.message || 'Nepoznata greška';
-        showError('Greška pri učitavanju slike: ' + errorMessage);
-      } finally {
-        setUploading(false);
+      } else {
+        const errorMsg = responseData.Message || responseData.message || 'Greška pri učitavanju slike';
+        showError(errorMsg);
       }
-    };
-  }, []);
+    } catch (error) {
+      console.error('Error uploading inline image:', error);
+      const errorMessage = error.response?.data?.Message || 
+                          error.response?.data?.message || 
+                          error.message || 
+                          'Nepoznata greška';
+      showError('Greška pri učitavanju slike: ' + errorMessage);
+    } finally {
+      setUploading(false);
+    }
+  };
+}, []);
 
   // Quill modules configuration
   const modules = {
@@ -266,11 +279,14 @@ const AdminArticleForm = () => {
   const loadCategories = useCallback(async () => {
     try {
       const response = await categoriesApi.getAll();
-      setCategories(response.data.data);
-      if (!isEdit && response.data.data.length > 0 && !formData.categoryId) {
+      const categoriesData = response.data || [];
+      setCategories(categoriesData);
+      
+      if (!isEdit && categoriesData.length > 0 && !formData.categoryId) {
+        const firstCategory = categoriesData[0];
         setFormData((prev) => ({
           ...prev,
-          categoryId: response.data.data[0].id,
+          categoryId: firstCategory.id || firstCategory.Id || "",
         }));
       }
     } catch (error) {
@@ -286,29 +302,32 @@ const AdminArticleForm = () => {
     try {
       setLoading(true);
       const response = await articlesApi.getById(id);
-      const article = response.data.data;
+      const article = response.data || {};
 
       console.log("Loaded article:", article);
 
       setFormData({
-        title: article.title || "",
-        content: article.content || "",
-        categoryId: article.categoryId || "",
-        isPublished: article.isPublished || false,
+        title: article.title || article.Title || "",
+        content: article.content || article.Content || "",
+        categoryId: article.categoryId || article.CategoryId || "",
+        isPublished: article.isPublished || article.IsPublished || false,
       });
 
       // Handle images - ensure URLs are complete
-      const formattedImages = (article.images || []).map(img => ({
-        ...img,
-        url: img.url || img.filePath || ""
+      const articleImages = article.images || article.Images || [];
+      const formattedImages = articleImages.map(img => ({
+        id: img.id || img.Id,
+        fileName: img.fileName || img.FileName || "",
+        url: img.url || img.Url || img.filePath || img.FilePath || "",
+        isPrimary: img.isPrimary || img.IsPrimary || false
       }));
 
       setImages(formattedImages);
-      setArticleId(article.id);
+      setArticleId(article.id || article.Id);
       setInitialLoad(true);
     } catch (error) {
       console.error("Error loading article:", error);
-      const errorMessage = error.response?.data?.message || error.message || 'Nepoznata greška';
+      const errorMessage = error.response?.data?.message || error.response?.data?.Message || error.message || 'Nepoznata greška';
       showError("Greška pri učitavanju članka: " + errorMessage);
     } finally {
       setLoading(false);
@@ -329,7 +348,7 @@ const AdminArticleForm = () => {
     }
   }, [formData, isEdit, initialLoad, isAutoSaved]);
 
-  // Handle back navigation with unsaved changes warning
+  // Handle back navigation
   const handleBackClick = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedChangesDialog(true);
@@ -342,7 +361,6 @@ const AdminArticleForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (!formData.title.trim()) {
       showValidationError("Naslov je obavezno polje");
       return;
@@ -362,17 +380,16 @@ const AdminArticleForm = () => {
 
     try {
       if (isEdit || isAutoSaved) {
-        // Update existing article
-        await articlesApi.update(articleId || id, formData);
+        const articleIdToUpdate = articleId || id;
+        await articlesApi.update(articleIdToUpdate, formData);
         setHasUnsavedChanges(false);
         showSuccess("Članak je uspješno ažuriran");
         setTimeout(() => {
           navigate("/admin/clanci");
         }, 1500);
       } else {
-        // Create new article
         const response = await articlesApi.create(formData);
-        const newArticleId = response.data.data.id;
+        const newArticleId = response.data?.id || response.data?.Id;
         setArticleId(newArticleId);
         setHasUnsavedChanges(false);
         showSuccess("Članak je uspješno kreiran");
@@ -382,129 +399,196 @@ const AdminArticleForm = () => {
       }
     } catch (error) {
       console.error("Error saving article:", error);
-      const errorMessage = error.response?.data?.message || error.message || 'Nepoznata greška';
+      const errorMessage = error.response?.data?.message || error.response?.data?.Message || error.message || 'Nepoznata greška';
       showError("Greška pri čuvanju članka: " + errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle featured image upload
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+// Handle featured image upload
+const handleImageUpload = async (e) => {
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
 
-    // If no articleId, auto-save article first
-    let currentArticleId = articleId;
+  let currentArticleId = articleId;
+  if (!currentArticleId) {
+    currentArticleId = await autoSaveArticle();
     if (!currentArticleId) {
-      currentArticleId = await autoSaveArticle();
-      if (!currentArticleId) {
-        e.target.value = "";
-        return; // Validation failed or error occurred
-      }
-    }
-
-    setUploading(true);
-    setUploadProgress(0);
-
-    const maxSize = 10 * 1024 * 1024;
-    const oversizedFiles = files.filter((file) => file.size > maxSize);
-
-    if (oversizedFiles.length > 0) {
-      showError(`Neke slike su prevelike. Maksimalna veličina je 10MB`);
-      setUploading(false);
       e.target.value = "";
       return;
     }
+  }
 
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    const invalidFiles = files.filter(file => !allowedTypes.includes(file.type));
-    
-    if (invalidFiles.length > 0) {
-      showError(`Neke slike imaju nepodržan format. Dozvoljeni formati: JPEG, PNG, GIF, WebP`);
-      setUploading(false);
-      e.target.value = "";
-      return;
-    }
+  setUploading(true);
+  setUploadProgress(0);
 
-    const uploadedImages = [];
+  const maxSize = 10 * 1024 * 1024;
+  const oversizedFiles = files.filter((file) => file.size > maxSize);
+
+  if (oversizedFiles.length > 0) {
+    showError(`Neke slike su prevelike. Maksimalna veličina je 10MB`);
+    setUploading(false);
+    e.target.value = "";
+    return;
+  }
+
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  const invalidFiles = files.filter(file => !allowedTypes.includes(file.type));
+  
+  if (invalidFiles.length > 0) {
+    showError(`Neke slike imaju nepodržan format. Dozvoljeni formati: JPEG, PNG, GIF, WebP`);
+    setUploading(false);
+    e.target.value = "";
+    return;
+  }
+
+  const uploadedImages = [];
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    setUploadProgress(Math.round((i / files.length) * 100));
     
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      setUploadProgress(Math.round((i / files.length) * 100));
+    try {
+      const response = await imagesApi.upload(currentArticleId, file);
+      const responseData = response.data || {};
       
-      try {
-        const response = await imagesApi.upload(currentArticleId, file);
-        if (response.data.success) {
-          uploadedImages.push(response.data.data);
-        } else {
-          showError(`Greška pri učitavanju slike ${file.name}: ${response.data.message}`);
-        }
-      } catch (error) {
-        console.error(`Error uploading image ${file.name}:`, error);
-        const errorMessage = error.response?.data?.message || error.message || 'Nepoznata greška';
-        showError(`Greška pri učitavanju slike ${file.name}: ${errorMessage}`);
+      console.log('Image upload response:', responseData);
+      
+      // The backend might return the image data directly OR wrapped in a Data property
+      // Check if we have an image object with an ID
+      const imageData = responseData.Data || responseData.data || responseData;
+      
+      if (imageData && (imageData.Id || imageData.id)) {
+        const uploadedImage = {
+          id: imageData.Id || imageData.id,
+          fileName: imageData.FileName || imageData.fileName || file.name,
+          url: imageData.Url || imageData.url || imageData.FilePath || imageData.filePath || '',
+          isPrimary: imageData.IsPrimary || imageData.isPrimary || false
+        };
+        
+        uploadedImages.push(uploadedImage);
+        console.log('Successfully processed image:', uploadedImage);
+      } else {
+        // Check if there's an error in the response
+        const errorMsg = responseData.Message || responseData.message || 
+                        responseData.error || responseData.Error || 
+                        'Nepoznata greška';
+        showError(`Greška pri učitavanju slike ${file.name}: ${errorMsg}`);
       }
+    } catch (error) {
+      console.error(`Error uploading image ${file.name}:`, error);
+      const errorMessage = error.response?.data?.Message || 
+                          error.response?.data?.message || 
+                          error.message || 
+                          'Nepoznata greška';
+      showError(`Greška pri učitavanju slike ${file.name}: ${errorMessage}`);
     }
+  }
 
-    if (uploadedImages.length > 0) {
-      setImages((prev) => [...prev, ...uploadedImages]);
+  if (uploadedImages.length > 0) {
+    // Add new images to existing ones
+    setImages((prev) => {
+      const newImages = [...prev];
+      uploadedImages.forEach(newImage => {
+        // Check if image already exists (by ID or by URL)
+        const exists = newImages.some(img => 
+          (img.id && newImage.id && img.id === newImage.id) || 
+          img.url === newImage.url
+        );
+        if (!exists) {
+          newImages.push(newImage);
+          console.log('Added new image to state:', newImage);
+        }
+      });
+      return newImages;
+    });
+    
+    // Show success message
+    if (uploadedImages.length === 1) {
+      showSuccess(`Slika je uspješno dodana`);
+    } else {
       showSuccess(`${uploadedImages.length} slika je uspješno dodano`);
     }
+  }
 
-    setUploading(false);
-    setUploadProgress(100);
-    setTimeout(() => setUploadProgress(0), 3000);
-    e.target.value = "";
-  };
+  setUploading(false);
+  setUploadProgress(100);
+  setTimeout(() => setUploadProgress(0), 3000);
+  e.target.value = "";
+};
 
   // Set image as primary
-  const handleSetPrimary = async (imageId) => {
-    try {
-      await imagesApi.setPrimary(imageId);
+const handleSetPrimary = async (imageId) => {
+  try {
+    const response = await imagesApi.setPrimary(imageId);
+    const responseData = response.data || {};
+    
+    // Check PascalCase 'Success'
+    if (responseData.Success === true || responseData.success === true) {
       setImages((prev) =>
         prev.map((img) => ({
           ...img,
-          isPrimary: img.id === imageId,
+          isPrimary: (img.id || img.Id) === imageId,
         }))
       );
       showSuccess("Glavna slika je uspješno postavljena");
-    } catch (error) {
-      console.error("Error setting primary image:", error);
-      showError("Greška pri postavljanju glavne slike");
+    } else {
+      const errorMsg = responseData.Message || responseData.message || 'Nepoznata greška';
+      showError(`Greška pri postavljanju glavne slike: ${errorMsg}`);
     }
-  };
+  } catch (error) {
+    console.error("Error setting primary image:", error);
+    const errorMessage = error.response?.data?.Message || 
+                        error.response?.data?.message || 
+                        error.message || 
+                        'Nepoznata greška';
+    showError("Greška pri postavljanju glavne slike: " + errorMessage);
+  }
+};
 
   // Handle delete image click
   const handleDeleteImageClick = (imageId) => {
-    const image = images.find((img) => img.id === imageId);
+    const image = images.find((img) => (img.id || img.Id) === imageId);
     if (!image) return;
 
     setImageToDelete(imageId);
     setDialogConfig({
       title: "Brisanje slike",
-      message: `Jeste li sigurni da želite obrisati sliku "${image.fileName}"? Ova akcija će ukloniti sliku iz baze podataka.`,
+      message: `Jeste li sigurni da želite obrisati sliku "${image.fileName || image.FileName || "ova"}"? Ova akcija će ukloniti sliku iz baze podataka.`,
       type: "warning",
     });
     setShowDeleteImageDialog(true);
   };
 
-  // Confirm image deletion
-  const confirmDeleteImage = async () => {
-    if (!imageToDelete) return;
+// Confirm image deletion
+const confirmDeleteImage = async () => {
+  if (!imageToDelete) return;
 
-    try {
-      await imagesApi.delete(imageToDelete);
-      setImages((prev) => prev.filter((img) => img.id !== imageToDelete));
+  try {
+    const response = await imagesApi.delete(imageToDelete);
+    const responseData = response.data || {};
+    
+    // Check PascalCase 'Success'
+    if (responseData.Success === true || responseData.success === true) {
+      setImages((prev) => prev.filter((img) => (img.id || img.Id) !== imageToDelete));
       showSuccess("Slika je uklonjena iz baze podataka");
-    } catch (error) {
-      console.error("Error deleting image:", error);
-      showError("Greška pri brisanju slike");
-    } finally {
-      setShowDeleteImageDialog(false);
-      setImageToDelete(null);
+    } else {
+      const errorMsg = responseData.Message || responseData.message || 'Nepoznata greška';
+      showError(`Greška pri brisanju slike: ${errorMsg}`);
     }
-  };
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    const errorMessage = error.response?.data?.Message || 
+                        error.response?.data?.message || 
+                        error.message || 
+                        'Nepoznata greška';
+    showError("Greška pri brisanju slike: " + errorMessage);
+  } finally {
+    setShowDeleteImageDialog(false);
+    setImageToDelete(null);
+  }
+};
 
   // Loading state
   if (loading && isEdit && !initialLoad) {
@@ -633,8 +717,8 @@ const AdminArticleForm = () => {
                   <>
                     <option value="">Izaberite kategoriju</option>
                     {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
+                      <option key={cat.id || cat.Id} value={cat.id || cat.Id}>
+                        {cat.name || cat.Name}
                       </option>
                     ))}
                   </>
@@ -669,7 +753,7 @@ const AdminArticleForm = () => {
                 onChange={(content) => setFormData({ ...formData, content })}
                 modules={modules}
                 formats={formats}
-                placeholder="Počnite pisati sadržaj članka... Možete dodati slike koristeći dugme za slike u toolbaru ili ih paste direktno."
+                placeholder="Počnite pisati sadržaj članka..."
                 style={{
                   height: '500px',
                   marginBottom: '3rem'
@@ -678,7 +762,7 @@ const AdminArticleForm = () => {
               />
             </div>
 
-            {/* Featured Images Section - Now always visible */}
+            {/* Featured Images Section */}
             <div className="form-group">
               <label>Istaknute slike (za galeriju)</label>
               <div
@@ -766,47 +850,54 @@ const AdminArticleForm = () => {
 
               {images.length > 0 && (
                 <div className="image-grid">
-                  {images.map((image) => (
-                    <div key={image.id} className="image-preview">
-                      <img
-                        src={image.url}
-                        alt={image.fileName}
-                        className="image-thumbnail"
-                        onError={(e) => {
-                          console.error("Image load error:", image.url);
-                          e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESlika nije dostupna%3C/text%3E%3C/svg%3E";
-                        }}
-                        loading="lazy"
-                      />
-                      {image.isPrimary && (
-                        <div className="primary-badge">
-                          <Star size={12} />
-                          Glavna
-                        </div>
-                      )}
-                      <div className="image-actions">
-                        {!image.isPrimary && (
+                  {images.map((image) => {
+                    const imgId = image.id || image.Id;
+                    const fileName = image.fileName || image.FileName || "";
+                    const imgUrl = image.url || image.Url || image.filePath || image.FilePath || "";
+                    const isPrimary = image.isPrimary || image.IsPrimary || false;
+                    
+                    return (
+                      <div key={imgId} className="image-preview">
+                        <img
+                          src={imgUrl}
+                          alt={fileName}
+                          className="image-thumbnail"
+                          onError={(e) => {
+                            console.error("Image load error:", imgUrl);
+                            e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' text-anchor='middle' dy='.3em' fill='%23999'%3ESlika nije dostupna%3C/text%3E%3C/svg%3E";
+                          }}
+                          loading="lazy"
+                        />
+                        {isPrimary && (
+                          <div className="primary-badge">
+                            <Star size={12} />
+                            Glavna
+                          </div>
+                        )}
+                        <div className="image-actions">
+                          {!isPrimary && (
+                            <button
+                              type="button"
+                              onClick={() => handleSetPrimary(imgId)}
+                              className="image-action-btn"
+                              title="Postavi kao glavnu sliku"
+                              disabled={loading}
+                            >
+                              <Star size={14} />
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={() => handleSetPrimary(image.id)}
-                            className="image-action-btn"
-                            title="Postavi kao glavnu sliku"
+                            onClick={() => handleDeleteImageClick(imgId)}
+                            className="image-action-btn delete"
                             disabled={loading}
                           >
-                            <Star size={14} />
+                            <X size={14} />
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteImageClick(image.id)}
-                          className="image-action-btn delete"
-                          disabled={loading}
-                        >
-                          <X size={14} />
-                        </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
