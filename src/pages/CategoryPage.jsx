@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useLocation } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
 import ArticleCard from "../components/ArticleCard";
 import {
@@ -15,6 +15,7 @@ import {
 const CategoryPage = () => {
   const { slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation(); // Added for route detection
   const [articles, setArticles] = useState([]);
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,21 @@ const CategoryPage = () => {
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = 12;
+
+  // Scroll to top when component mounts or slug/page changes
+  useEffect(() => {
+    // Immediate scroll to top
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+    // Additional fallbacks for browser compatibility
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // WebView compatibility
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'SCROLL_TO_TOP' }));
+    }
+  }, [slug, currentPage, location.key]); // Added location.key to detect route changes
 
   useEffect(() => {
     loadCategoryData();
@@ -70,7 +86,7 @@ const CategoryPage = () => {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setSearchParams({ page: newPage.toString() });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // This will be handled by the useEffect above when currentPage changes
     }
   };
 
