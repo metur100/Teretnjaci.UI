@@ -9,6 +9,19 @@ const Footer = () => {
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
               © 2025 Teretnjaci.ba
             </p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
+              Developed by{' '}
+              <a 
+                href="https://medinturkes.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: 'var(--primary-color)', textDecoration: 'none' }}
+                onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+              >
+                Medin Turkes
+              </a>
+            </p>
           </div>
           <nav className="footer-links">
             <Link to="/kategorija/vijesti">Vijesti</Link>

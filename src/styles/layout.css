@@ -191,12 +191,12 @@
   }
 }
 
-/* Footer */
 .footer {
   background: var(--bg-secondary);
   border-top: 1px solid var(--border);
   padding: 2rem 0;
   margin-top: auto;
+  flex-shrink: 0; 
 }
 
 .footer-content {
@@ -209,7 +209,7 @@
 
 .footer-links {
   display: flex;
-  gap: 2rem;
+  gap: 1.3rem;
   flex-wrap: wrap;
 }
 
