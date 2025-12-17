@@ -9,7 +9,7 @@ const Footer = ({ style }) => {
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
               © 2026 Teretnjaci.ba
             </p>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
               Developed by{' '}
               <a 
                 href="https://medinturkes.com" 
