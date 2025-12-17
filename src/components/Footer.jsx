@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 
-const Footer = () => {
+const Footer = ({ style }) => {
   return (
-    <footer className="footer">
+    <footer className="footer" style={style}>
       <div className="container">
         <div className="footer-content">
           <div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              © 2025 Teretnjaci.ba
+              © 2026 Teretnjaci.ba
             </p>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
               Developed by{' '}
