@@ -11,7 +11,6 @@
   z-index: 100;
   overflow: visible;
   transition: all 0.3s ease;
-  width: 100%;
 }
 
 .header-content {
@@ -138,7 +137,7 @@
   }
 }
 
-/* Mobile Bottom Navigation - FIXED for Android System Buttons */
+/* Mobile Bottom Navigation */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -147,15 +146,9 @@
   background: rgba(15, 23, 42, 0.98);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
+  padding: 0.75rem 0;
   z-index: 100;
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
-  
-  /* CRITICAL: Lift above Android system buttons */
-  padding-bottom: env(safe-area-inset-bottom, 0.75rem);
-  padding-top: 0.75rem;
-  
-  /* Alternative: Fixed padding for Android */
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem));
 }
 
 .bottom-nav-content {
@@ -179,9 +172,6 @@
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-secondary);
-  /* Better touch target */
-  min-height: 64px;
-  justify-content: center;
 }
 
 .bottom-nav a.active {
