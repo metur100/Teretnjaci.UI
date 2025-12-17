@@ -25,9 +25,16 @@ const ConfirmationDialog = ({
 
   return (
     <div className="modal-overlay" onClick={onCancel}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h3 className="modal-title">{title}</h3>
-        <p className="modal-message">{message}</p>
+      <div 
+        className="modal-content" 
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <h3 id="modal-title">{title}</h3>
+        <p id="modal-description">{message}</p>
         <div className="modal-actions">
           {!hideCancel && (
             <button 
@@ -42,7 +49,6 @@ const ConfirmationDialog = ({
             className={`btn ${getButtonColor()}`} 
             onClick={onConfirm}
             aria-label={confirmText}
-            autoFocus={!hideCancel}
           >
             {confirmText}
           </button>
