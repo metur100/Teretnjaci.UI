@@ -3,9 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć" />
-    <title>Teretnjaci.ba </title>
+    <title>Teretnjaci.ba</title>
+    
+    <style>
+      /* Prevent flash of improperly positioned content */
+      html, body {
+        height: 100%;
+        overflow-x: hidden;
+        position: relative;
+      }
+      
+      body {
+        display: block !important;
+      }
+      
+      #root {
+        min-height: 100vh;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
