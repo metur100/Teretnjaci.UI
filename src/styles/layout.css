@@ -194,10 +194,10 @@
 .footer {
   background: var(--bg-secondary);
   border-top: 1px solid var(--border);
-  padding: 2rem 0;
-  margin-top: auto;
-  flex-shrink: 0; 
-}
+  padding: 3rem 0;
+  margin-top: auto; 
+  flex-shrink: 0;
+} 
 
 .footer-content {
   display: flex;

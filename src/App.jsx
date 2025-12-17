@@ -14,6 +14,24 @@ import ProtectedRoute from './components/ProtectedRoute';
 import CategoryPage from './pages/CategoryPage';
 
 function App() {
+
+  useEffect(() => {
+    // Fix for Android WebView height calculation
+    function setRealVH() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    setRealVH();
+    window.addEventListener('resize', setRealVH);
+    window.addEventListener('orientationchange', setRealVH);
+    
+    return () => {
+      window.removeEventListener('resize', setRealVH);
+      window.removeEventListener('orientationchange', setRealVH);
+    };
+  }, []);
+
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -67,8 +85,7 @@ function NavigationHandler() {
 
   useEffect(() => {
     const canGoBack = window.history.length > 1;
-    
-    // Method 2: Using standard Android JavaScript interface
+
     if (window.Android && window.Android.onRouteChange) {
       window.Android.onRouteChange(canGoBack);
     }
@@ -77,11 +94,4 @@ function NavigationHandler() {
   return null;
 }
 
-function setVh() {
-  const vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-
-setVh();
-window.addEventListener('resize', setVh);
 
