@@ -1,4 +1,5 @@
 import React from 'react';
+
 const ConfirmationDialog = ({ 
   isOpen, 
   title, 
@@ -23,17 +24,26 @@ const ConfirmationDialog = ({
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h3 style={{ marginBottom: '1rem' }}>{title}</h3>
-        <p style={{ marginBottom: '1.5rem', lineHeight: '1.5' }}>{message}</p>
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <h3 className="modal-title">{title}</h3>
+        <p className="modal-message">{message}</p>
         <div className="modal-actions">
           {!hideCancel && (
-            <button className="btn btn-secondary" onClick={onCancel}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={onCancel}
+              aria-label={cancelText}
+            >
               {cancelText}
             </button>
           )}
-          <button className={`btn ${getButtonColor()}`} onClick={onConfirm}>
+          <button 
+            className={`btn ${getButtonColor()}`} 
+            onClick={onConfirm}
+            aria-label={confirmText}
+            autoFocus={!hideCancel}
+          >
             {confirmText}
           </button>
         </div>
