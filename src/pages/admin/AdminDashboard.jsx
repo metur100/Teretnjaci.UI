@@ -1,9 +1,18 @@
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { FileText, Users, LogOut, Home, Menu, X, Sun, Moon } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import logo from '../../images/teretnjaci.png';
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import {
+  FileText,
+  Users,
+  LogOut,
+  Home,
+  Menu,
+  X,
+  Sun,
+  Moon,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { useTheme } from "../../context/ThemeContext";
+import logo from "../../images/teretnjaci.png";
 
 const AdminDashboard = () => {
   const { user, logout, isOwner } = useAuth();
@@ -17,21 +26,21 @@ const AdminDashboard = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 1024);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
+    window.addEventListener("resize", checkMobile);
+
     // If we're at /admin without any sub-route, redirect to /admin/clanci
-    if (location.pathname === '/admin') {
-      navigate('/admin/clanci', { replace: true });
+    if (location.pathname === "/admin") {
+      navigate("/admin/clanci", { replace: true });
     }
-    
-    return () => window.removeEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, [location.pathname, navigate]);
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    navigate("/admin/login");
   };
 
   const toggleSidebar = () => {
@@ -59,49 +68,47 @@ const AdminDashboard = () => {
       {/* Mobile Header */}
       {isMobile && (
         <div className="admin-mobile-header">
+          // Update your mobile menu button
           <button
             onClick={toggleSidebar}
+            onTouchStart={toggleSidebar} // Add touch event
             className="mobile-menu-button"
+            style={{
+              WebkitTapHighlightColor: "transparent", // Remove tap highlight
+              userSelect: "none",
+            }}
           >
             <Menu size={24} />
           </button>
-          
           <Link to="/" className="mobile-logo">
-            <img 
-              src={logo}
-              alt="Teretnjaci.ba" 
-              className="admin-logo-mobile"
-            />
+            <img src={logo} alt="Teretnjaci.ba" className="admin-logo-mobile" />
           </Link>
-          
-          <div style={{ width: '48px', opacity: 0 }}></div>
+          <div style={{ width: "48px", opacity: 0 }}></div>
         </div>
       )}
 
       {/* Sidebar Overlay for mobile */}
       {isMobile && sidebarOpen && (
-        <div 
-          className="sidebar-overlay" 
-          onClick={toggleSidebar}
-        />
+        <div className="sidebar-overlay" onClick={toggleSidebar} />
       )}
 
       {/* Sidebar */}
-      <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''} ${!isMobile ? 'desktop-only' : ''}`}>
+      <aside
+        className={`admin-sidebar ${sidebarOpen ? "open" : ""} ${
+          !isMobile ? "desktop-only" : ""
+        }`}
+      >
         <div className="admin-sidebar-header">
           <Link to="/" className="sidebar-logo">
-            <img 
-              src={logo} 
-              alt="Teretnjaci.ba" 
+            <img
+              src={logo}
+              alt="Teretnjaci.ba"
               className="admin-logo-sidebar"
             />
           </Link>
-          
+
           {isMobile && (
-            <button
-              onClick={toggleSidebar}
-              className="close-sidebar-button"
-            >
+            <button onClick={toggleSidebar} className="close-sidebar-button">
               <X size={24} />
             </button>
           )}
@@ -118,7 +125,9 @@ const AdminDashboard = () => {
         <nav className="admin-sidebar-nav">
           <Link
             to="/"
-            className={`admin-nav-link ${location.pathname === '/' ? 'active' : ''}`}
+            className={`admin-nav-link ${
+              location.pathname === "/" ? "active" : ""
+            }`}
             onClick={closeSidebar}
           >
             <Home size={20} />
@@ -127,7 +136,9 @@ const AdminDashboard = () => {
 
           <Link
             to="/admin/clanci"
-            className={`admin-nav-link ${location.pathname.includes('/admin/clanci') ? 'active' : ''}`}
+            className={`admin-nav-link ${
+              location.pathname.includes("/admin/clanci") ? "active" : ""
+            }`}
             onClick={closeSidebar}
           >
             <FileText size={20} />
@@ -137,7 +148,9 @@ const AdminDashboard = () => {
           {isOwner() && (
             <Link
               to="/admin/admini"
-              className={`admin-nav-link ${location.pathname.includes('/admin/admini') ? 'active' : ''}`}
+              className={`admin-nav-link ${
+                location.pathname.includes("/admin/admini") ? "active" : ""
+              }`}
               onClick={closeSidebar}
             >
               <Users size={20} />
@@ -147,25 +160,27 @@ const AdminDashboard = () => {
         </nav>
 
         {/* Theme Toggle */}
-        <div style={{ 
-          padding: '1rem 0',
-          borderTop: '1px solid var(--border)',
-          borderBottom: '1px solid var(--border)',
-          marginTop: 'auto'
-        }}>
+        <div
+          style={{
+            padding: "1rem 0",
+            borderTop: "1px solid var(--border)",
+            borderBottom: "1px solid var(--border)",
+            marginTop: "auto",
+          }}
+        >
           <button
             onClick={toggleTheme}
             className="btn btn-secondary"
-            style={{ 
-              width: '100%',
-              justifyContent: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem'
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
             }}
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            <span>{theme === 'dark' ? 'Svijetli režim' : 'Tamni režim'}</span>
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            <span>{theme === "dark" ? "Svijetli režim" : "Tamni režim"}</span>
           </button>
         </div>
 
