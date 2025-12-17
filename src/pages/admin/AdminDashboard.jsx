@@ -68,7 +68,6 @@ const AdminDashboard = () => {
       {/* Mobile Header */}
       {isMobile && (
         <div className="admin-mobile-header">
-          // Update your mobile menu button
           <button
             onClick={toggleSidebar}
             onTouchStart={toggleSidebar} // Add touch event
