@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Truck, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
+import logo from "../../images/teretnjaci.png";
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
@@ -60,9 +61,6 @@ const AdminLogin = () => {
           boxShadow: '0 20px 60px var(--shadow)',
           textAlign: 'center'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-            <Truck size={48} color="var(--primary)" />
-          </div>
           <div className="spinner" style={{ margin: '1rem auto' }}></div>
           <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>Provjera autentikacije...</p>
         </div>
@@ -94,11 +92,7 @@ const AdminLogin = () => {
         boxShadow: '0 20px 60px var(--shadow)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-            <Truck size={48} color="var(--primary)" />
-          </div>
-          <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Teretnjaci.ba</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Admin pristup</p>
+          <img src={logo} alt="Teretnjaci.ba" className="logo-image" />
         </div>
 
         {error && (
