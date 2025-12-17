@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { articlesApi } from '../services/api';
 import { format } from 'date-fns';
 import { bs } from 'date-fns/locale';
@@ -7,9 +7,25 @@ import { Eye, Calendar, User, AlertTriangle, HandHelping, Megaphone, Navigation,
 
 const ArticleDetail = () => {
   const { slug } = useParams();
+  const location = useLocation(); // Get location to detect route changes
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imageError, setImageError] = useState({});
+
+  // Scroll to top on component mount and when slug changes
+  useEffect(() => {
+    // Scroll to top immediately
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+    // Also ensure body scroll is reset
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // For WebView compatibility
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'SCROLL_TO_TOP' }));
+    }
+  }, [slug, location.key]); // Add location.key to trigger on any route change
 
   useEffect(() => {
     loadArticle();
@@ -20,6 +36,11 @@ const ArticleDetail = () => {
       setLoading(true);
       const response = await articlesApi.getBySlug(slug);
       setArticle(response.data || null);
+      
+      // Small delay to ensure DOM is ready, then scroll again
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 50);
     } catch (error) {
       console.error('Error loading article:', error);
       setArticle(null);
@@ -28,6 +49,7 @@ const ArticleDetail = () => {
     }
   };
 
+  // ... rest of your existing code remains exactly the same ...
   const handleImageError = (imageId) => {
     setImageError(prev => ({ ...prev, [imageId]: true }));
   };
