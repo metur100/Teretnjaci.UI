@@ -18,6 +18,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          <NavigationHandler />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Layout />}>
@@ -57,3 +58,21 @@ function App() {
 }
 
 export default App;
+
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+
+function NavigationHandler() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const canGoBack = window.history.length > 1;
+    
+    // Method 2: Using standard Android JavaScript interface
+    if (window.Android && window.Android.onRouteChange) {
+      window.Android.onRouteChange(canGoBack);
+    }
+  }, [location]);
+
+  return null;
+}
