@@ -18,7 +18,6 @@ const AdminLogin = () => {
   // Check if user is already logged in
   useEffect(() => {
     if (user) {
-      // Get the redirect path from location state or default to admin dashboard
       const from = location.state?.from?.pathname || '/admin';
       navigate(from, { replace: true });
     } else {
@@ -34,6 +33,7 @@ const AdminLogin = () => {
     const result = await login(username, password);
     
     if (result.success) {
+      // Navigation handled by useEffect
     } else {
       setError(result.message);
       setLoading(false);
@@ -45,6 +45,7 @@ const AdminLogin = () => {
     return (
       <div style={{
         minHeight: '100vh',
+        minHeight: 'calc(var(--vh, 1vh) * 100)', // WebView compatible
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -68,7 +69,7 @@ const AdminLogin = () => {
     );
   }
 
-  // Don't render login form if user exists (though useEffect should redirect)
+  // Don't render login form if user exists
   if (user) {
     return null;
   }
@@ -76,6 +77,7 @@ const AdminLogin = () => {
   return (
     <div style={{
       minHeight: '100vh',
+      minHeight: 'calc(var(--vh, 1vh) * 100)', // WebView compatible
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -92,7 +94,14 @@ const AdminLogin = () => {
         boxShadow: '0 20px 60px var(--shadow)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src={logo} alt="Teretnjaci.ba" className="logo-image" />
+          <img 
+            src={logo} 
+            alt="Teretnjaci.ba" 
+            style={{
+              maxWidth: '200px',
+              height: 'auto'
+            }}
+          />
         </div>
 
         {error && (
@@ -156,7 +165,7 @@ const AdminLogin = () => {
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <a href="/" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+          <a href="/" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none' }}>
             ← Povratak na početnu
           </a>
         </div>
