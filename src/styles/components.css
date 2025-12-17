@@ -269,9 +269,6 @@ select.form-control {
 /* ============================================
    MODALS - Fixed for Mobile Height
    ============================================ */
-/* ============================================
-   MODALS - Optimized for Mobile WebView
-   ============================================ */
 
 .modal-overlay {
   position: fixed;
@@ -281,13 +278,12 @@ select.form-control {
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 2000;
   padding: 1rem;
   backdrop-filter: blur(4px);
-  /* Remove viewport-based constraints */
-  min-height: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -303,10 +299,7 @@ select.form-control {
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
-  /* Let content determine height */
-  min-height: auto;
-  max-height: none;
-  margin: auto;
+  margin: auto; /* Centers vertically in flex container */
   position: relative;
 }
 
@@ -358,17 +351,20 @@ select.form-control {
 @media (max-width: 767px) {
   .modal-overlay {
     padding: 1rem;
-    align-items: center;
+    /* Force vertical centering on mobile */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
 
   .modal-content {
     padding: 1.75rem 1.25rem;
     max-width: 95vw;
     width: calc(100vw - 2rem);
-    /* Critical: Remove all height constraints on mobile */
-    min-height: auto !important;
-    max-height: none !important;
-    height: auto !important;
+    /* Remove any conflicting positioning */
+    position: relative;
+    transform: none;
+    margin: auto;
   }
   
   .modal-content h3,
@@ -448,7 +444,6 @@ select.form-control {
   .modal-content {
     max-width: 500px;
     padding: 2rem;
-    /* Desktop can have max-height but still flexible */
     max-height: 90vh;
     overflow-y: auto;
   }
@@ -470,12 +465,13 @@ select.form-control {
 @media (max-width: 767px) and (max-height: 500px) and (orientation: landscape) {
   .modal-overlay {
     padding: 0.5rem;
+    /* In landscape, allow scrolling if needed */
     align-items: flex-start;
     overflow-y: auto;
   }
 
   .modal-content {
-    margin: 1rem auto;
+    margin: 0.5rem auto;
     padding: 1.25rem 1rem;
   }
   
@@ -503,6 +499,20 @@ select.form-control {
   }
 }
 
+/* Extra safety for WebView centering */
+@media (max-width: 767px) {
+  .modal-overlay::before {
+    content: '';
+    flex: 1;
+    min-height: 1px;
+  }
+  
+  .modal-overlay::after {
+    content: '';
+    flex: 1;
+    min-height: 1px;
+  }
+}
 /* Loading */
 .loading {
   display: flex;
