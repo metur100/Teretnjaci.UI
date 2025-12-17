@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
 import { articlesApi } from "../../services/api";
 import {
   Plus,
@@ -64,6 +64,22 @@ const AdminArticles = () => {
   const [articleToDelete, setArticleToDelete] = useState(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // Add location to detect route changes
+
+  // Scroll to top when component mounts or page/filter/search changes
+  useEffect(() => {
+    // Scroll to top immediately
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+    // Also ensure body scroll is reset
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // For WebView compatibility
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'SCROLL_TO_TOP' }));
+    }
+  }, [page, filter, searchQuery, location.key]); // Add location.key to trigger on route changes
 
   useEffect(() => {
     loadArticles();
@@ -144,6 +160,12 @@ const loadArticles = async () => {
     setPage(1);
   };
 
+  // Also scroll to top when creating a new article
+  const handleCreateNewArticle = () => {
+    navigate("/admin/clanci/novi");
+    // The scroll will be handled by the target component
+  };
+
   const formatDate = (article) => {
     const publishedAt = getArticleProperty(article, 'publishedAt');
     const createdAt = getArticleProperty(article, 'createdAt');
@@ -172,6 +194,12 @@ const loadArticles = async () => {
     return isPublished ? "●" : "◌";
   };
 
+  // Handle pagination with scroll to top
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    // The useEffect will handle the scroll when page changes
+  };
+
   return (
     <>
       {/* Delete Confirmation Dialog */}
@@ -191,7 +219,7 @@ const loadArticles = async () => {
           <h1>Upravljanje člancima</h1>
           <button
             className="btn btn-primary"
-            onClick={() => navigate("/admin/clanci/novi")}
+            onClick={handleCreateNewArticle}
             style={{
               padding: "0.875rem 2rem",
               fontWeight: "700",
@@ -262,19 +290,28 @@ const loadArticles = async () => {
             >
               <button
                 className={`filter-tab ${filter === "all" ? "active" : ""}`}
-                onClick={() => setFilter("all")}
+                onClick={() => {
+                  setFilter("all");
+                  setPage(1); // Reset page when changing filter
+                }}
               >
                 Svi članci
               </button>
               <button
                 className={`filter-tab ${filter === "published" ? "active" : ""}`}
-                onClick={() => setFilter("published")}
+                onClick={() => {
+                  setFilter("published");
+                  setPage(1); // Reset page when changing filter
+                }}
               >
                 Objavljeni
               </button>
               <button
                 className={`filter-tab ${filter === "draft" ? "active" : ""}`}
-                onClick={() => setFilter("draft")}
+                onClick={() => {
+                  setFilter("draft");
+                  setPage(1); // Reset page when changing filter
+                }}
               >
                 Draftovi
               </button>
@@ -305,6 +342,7 @@ const loadArticles = async () => {
                     }`}
                     onClick={() => {
                       setFilter("all");
+                      setPage(1);
                       setShowMobileFilters(false);
                     }}
                     style={{
@@ -325,6 +363,7 @@ const loadArticles = async () => {
                     }`}
                     onClick={() => {
                       setFilter("published");
+                      setPage(1);
                       setShowMobileFilters(false);
                     }}
                     style={{
@@ -348,6 +387,7 @@ const loadArticles = async () => {
                     }`}
                     onClick={() => {
                       setFilter("draft");
+                      setPage(1);
                       setShowMobileFilters(false);
                     }}
                     style={{
@@ -670,7 +710,7 @@ const loadArticles = async () => {
                     {page > 1 && (
                       <button
                         className="btn btn-secondary"
-                        onClick={() => setPage(page - 1)}
+                        onClick={() => handlePageChange(page - 1)}
                       >
                         Prethodna
                       </button>
@@ -681,7 +721,7 @@ const loadArticles = async () => {
                     {page < totalPages && (
                       <button
                         className="btn btn-secondary"
-                        onClick={() => setPage(page + 1)}
+                        onClick={() => handlePageChange(page + 1)}
                       >
                         Sljedeća
                       </button>
@@ -704,7 +744,7 @@ const loadArticles = async () => {
                 {!searchQuery && (
                   <button
                     className="btn btn-primary"
-                    onClick={() => navigate("/admin/clanci/novi")}
+                    onClick={handleCreateNewArticle}
                   >
                     <Plus size={18} />
                     Kreiraj novi članak
