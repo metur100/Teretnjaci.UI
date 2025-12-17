@@ -4,7 +4,7 @@
 
 .admin-dashboard {
   display: flex;
-  min-height: calc(var(--vh, 1vh) * 100);
+  min-height: 100%;
 }
 
 /* Mobile Header */
@@ -260,7 +260,7 @@
 .admin-main {
   flex: 1;
   background: var(--bg-primary);
-  min-height: calc(var(--vh, 1vh) * 100);
+  min-height: 100%;
   padding: 1rem;
   margin-top: 70px;
 }
