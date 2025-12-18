@@ -44,7 +44,6 @@ const AdminLogin = () => {
   if (checkingAuth) {
     return (
       <div style={{
-        minHeight: '100vh',
         minHeight: 'calc(var(--vh, 1vh) * 100)', // WebView compatible
         display: 'flex',
         alignItems: 'center',
@@ -76,8 +75,7 @@ const AdminLogin = () => {
 
   return (
     <div style={{
-      minHeight: '100vh',
-      minHeight: 'calc(var(--vh, 1vh) * 100)', // WebView compatible
+      minHeight: 'calc(var(--vh, 1vh) * 100)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -98,7 +96,7 @@ const AdminLogin = () => {
             src={logo} 
             alt="Teretnjaci.ba" 
             style={{
-              maxWidth: '200px',
+              width: '300px',
               height: 'auto'
             }}
           />
