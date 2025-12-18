@@ -16,7 +16,6 @@ import CategoryPage from './pages/CategoryPage';
 function App() {
 
   useEffect(() => {
-    // Fix for Android WebView height calculation
     function setRealVH() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
