@@ -31,6 +31,7 @@ import sponzor6Img from "../images/sponzor6.png";
 import sponzor7Img from "../images/sponzor7.png";
 import sponzor8Img from "../images/sponzor8.png";
 import sponzor9Img from "../images/sponzor9.png";
+import sponzor10Img from "../images/sponzor10.png";
 import teretnjaci from "../images/teretnjaci.png";
 
 const Home = () => {
@@ -59,6 +60,7 @@ const Home = () => {
     { img: sponzor7Img, url: "https://www.facebook.com/p/Proizvodnja-tekstilnih-proizvoda-Ostrvica-100061079243486/" },
     { img: sponzor8Img, url: "https://rimes.ba/" },
     { img: sponzor9Img, url: "https://balkanhidraulik.com/hr/" },
+    { img: sponzor10Img, url: "https://www.timocom.com.hr/" },
   ];
 
   useEffect(() => {
