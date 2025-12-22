@@ -67,6 +67,10 @@ const Home = () => {
     loadData();
   }, [searchQuery]);
 
+    useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSponsor((prev) => (prev + 1) % sponsors.length);

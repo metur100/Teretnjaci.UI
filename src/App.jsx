@@ -12,6 +12,8 @@ import AdminArticleForm from './pages/admin/AdminArticleForm';
 import AdminUsers from './pages/admin/AdminUsers';
 import ProtectedRoute from './components/ProtectedRoute';
 import CategoryPage from './pages/CategoryPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfUse from './pages/TermsOfUse';
 
 function App() {
 
@@ -42,6 +44,8 @@ function App() {
               <Route index element={<Home />} />
               <Route path="kategorija/:slug" element={<CategoryPage />} />
               <Route path="clanak/:slug" element={<ArticleDetail />} />
+              <Route path="/politika-privatnosti" element={<PrivacyPolicy />} />
+              <Route path="/uslovi-koristenja" element={<TermsOfUse />} />
             </Route>
 
             {/* Admin Routes */}
