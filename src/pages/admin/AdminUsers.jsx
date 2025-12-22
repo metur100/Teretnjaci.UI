@@ -46,7 +46,11 @@ const AdminUsers = () => {
     loadUsers();
   }, []);
 
-// Update the loadUsers function in AdminUsers.jsx:
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+    // Also ensure body scroll is reset
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
 
 const loadUsers = async () => {
   try {
