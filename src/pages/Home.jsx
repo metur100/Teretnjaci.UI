@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
 import ArticleCard from "../components/ArticleCard";
@@ -18,7 +18,6 @@ import {
   Smartphone,
   Megaphone,
   Newspaper,
-  FileText,
 } from "lucide-react";
 import { format } from "date-fns";
 import { bs } from "date-fns/locale";
@@ -43,39 +42,28 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [featuredHovered, setFeaturedHovered] = useState(false);
-  const [currentSponsor, setCurrentSponsor] = useState(0);
 
   const searchQuery = searchParams.get("search");
 
-  const sponsors = [
+  const sponsors = useMemo(() => [
     { img: sponzorImg, url: "https://esplast.ba/" },
     { img: sponzor2Img, url: "https://www.eurolimun.com/" },
     { img: sponzor3Img, url: "https://www.febi.com/" },
     { img: sponzor4Img, url: "https://truckshop.ba/" },
     { img: sponzor5Img, url: "https://www.tahograf.hr/" },
-    {
-      img: sponzor6Img,
-      url: "https://www.fijavz.com/",
-    },
+    { img: sponzor6Img, url: "https://www.fijavz.com/" },
     { img: sponzor7Img, url: "https://www.facebook.com/p/Proizvodnja-tekstilnih-proizvoda-Ostrvica-100061079243486/" },
     { img: sponzor8Img, url: "https://rimes.ba/" },
     { img: sponzor9Img, url: "https://balkanhidraulik.com/hr/" },
     { img: sponzor10Img, url: "https://www.timocom.com.hr/" },
-  ];
+  ], []);
 
   useEffect(() => {
     loadData();
   }, [searchQuery]);
 
-    useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSponsor((prev) => (prev + 1) % sponsors.length);
-    }, 5000);
-    return () => clearInterval(interval);
+    window.scrollTo(0, 0);
   }, []);
 
   const loadData = async () => {
@@ -87,44 +75,42 @@ const Home = () => {
           search: searchQuery,
           pageSize: 12,
         });
-        // FIX: Use response.data directly (already normalized)
         setLatestArticles(response.data || []);
       } else {
-        const catResponse = await categoriesApi.getAll();
-        // FIX: catResponse.data is already the normalized array
-        setCategories(catResponse.data || []);
+        // Load categories and latest articles in parallel
+        const [catResponse, latestResponse] = await Promise.all([
+          categoriesApi.getAll(),
+          articlesApi.getAll({ page: 1, pageSize: 7 })
+        ]);
 
-        const latestResponse = await articlesApi.getAll({
-          page: 1,
-          pageSize: 7,
-        });
-        // FIX: Use normalized response.data
+        setCategories(catResponse.data || []);
         setLatestArticles(latestResponse.data || []);
 
-        const popularResponse = await articlesApi.getAll({
-          page: 1,
-          pageSize: 10,
+        // Load popular articles in background (non-blocking)
+        articlesApi.getAll({ page: 1, pageSize: 10 }).then((popularResponse) => {
+          const articlesData = popularResponse.data || [];
+          const sorted = [...articlesData].sort(
+            (a, b) => (b.viewCount || b.ViewCount || 0) - (a.viewCount || a.ViewCount || 0)
+          );
+          setPopularArticles(sorted.slice(0, 6));
         });
-        const articlesData = popularResponse.data || [];
-        const sorted = [...articlesData].sort(
-          (a, b) => (b.viewCount || b.ViewCount || 0) - (a.viewCount || a.ViewCount || 0)
-        );
-        setPopularArticles(sorted.slice(0, 6));
 
+        // Load category articles in parallel
         const categoryData = {};
-        // FIX: categories is already an array from catResponse.data
-        for (const cat of catResponse.data || []) {
+        const categoryPromises = (catResponse.data || []).map(async (cat) => {
+          const categorySlug = cat.slug || cat.Slug;
           const response = await articlesApi.getAll({
-            category: cat.slug || cat.Slug,
+            category: categorySlug,
             pageSize: 3,
           });
-          categoryData[cat.slug || cat.Slug] = response.data || [];
-        }
+          categoryData[categorySlug] = response.data || [];
+        });
+
+        await Promise.allSettled(categoryPromises);
         setCategoryArticles(categoryData);
       }
     } catch (error) {
       console.error("Error loading data:", error);
-      // Ensure all states are set to empty arrays on error
       setLatestArticles([]);
       setPopularArticles([]);
       setCategories([]);
@@ -134,12 +120,10 @@ const Home = () => {
     }
   };
 
-  // FIX: Add null/undefined check and property normalization
   const getBadgeClass = (category) => {
     if (!category) return "";
     
     try {
-      // Handle both camelCase and PascalCase property names
       const categoryName = category.toLowerCase 
         ? category.toLowerCase() 
         : String(category).toLowerCase();
@@ -166,7 +150,6 @@ const Home = () => {
     }
   };
 
-  // FIX: Add null/undefined check
   const getCategoryIcon = (category) => {
     if (!category) return null;
     
@@ -194,7 +177,6 @@ const Home = () => {
     }
   };
 
-  // FIX: Add null/undefined check
   const getCategoryHeaderIcon = (categorySlug) => {
     if (!categorySlug) return (
       <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />
@@ -226,24 +208,21 @@ const Home = () => {
     }
   };
 
-if (loading) {
-  return (
-    <div className="loading-container">
-      <div className="loading">
-        <div className="spinner"></div>
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading">
+          <div className="spinner"></div>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-  // FIX: Check if latestArticles exists and has items
   const featuredArticle = latestArticles && latestArticles.length > 0 ? latestArticles[0] : null;
 
-  // FIX: Helper function to get property safely
   const getArticleProperty = (article, prop) => {
     if (!article) return "";
     
-    // Try different property name variations
     return article[prop] || 
            article[prop.charAt(0).toUpperCase() + prop.slice(1)] || 
            article[prop.toLowerCase()] || 
