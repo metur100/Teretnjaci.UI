@@ -45,18 +45,24 @@ const Home = () => {
 
   const searchQuery = searchParams.get("search");
 
-  const sponsors = useMemo(() => [
-    { img: sponzorImg, url: "https://esplast.ba/" },
-    { img: sponzor2Img, url: "https://www.eurolimun.com/" },
-    { img: sponzor3Img, url: "https://www.febi.com/" },
-    { img: sponzor4Img, url: "https://truckshop.ba/" },
-    { img: sponzor5Img, url: "https://www.tahograf.hr/" },
-    { img: sponzor6Img, url: "https://www.fijavz.com/" },
-    { img: sponzor7Img, url: "https://www.facebook.com/p/Proizvodnja-tekstilnih-proizvoda-Ostrvica-100061079243486/" },
-    { img: sponzor8Img, url: "https://rimes.ba/" },
-    { img: sponzor9Img, url: "https://balkanhidraulik.com/hr/" },
-    { img: sponzor10Img, url: "https://www.timocom.com.hr/" },
-  ], []);
+  const sponsors = useMemo(
+    () => [
+      { img: sponzorImg, url: "https://esplast.ba/" },
+      { img: sponzor2Img, url: "https://www.eurolimun.com/" },
+      { img: sponzor3Img, url: "https://www.febi.com/" },
+      { img: sponzor4Img, url: "https://truckshop.ba/" },
+      { img: sponzor5Img, url: "https://www.tahograf.hr/" },
+      { img: sponzor6Img, url: "https://www.fijavz.com/" },
+      {
+        img: sponzor7Img,
+        url: "https://www.facebook.com/p/Proizvodnja-tekstilnih-proizvoda-Ostrvica-100061079243486/",
+      },
+      { img: sponzor8Img, url: "https://rimes.ba/" },
+      { img: sponzor9Img, url: "https://balkanhidraulik.com/hr/" },
+      { img: sponzor10Img, url: "https://www.timocom.com.hr/" },
+    ],
+    []
+  );
 
   useEffect(() => {
     loadData();
@@ -80,20 +86,24 @@ const Home = () => {
         // Load categories and latest articles in parallel
         const [catResponse, latestResponse] = await Promise.all([
           categoriesApi.getAll(),
-          articlesApi.getAll({ page: 1, pageSize: 7 })
+          articlesApi.getAll({ page: 1, pageSize: 7 }),
         ]);
 
         setCategories(catResponse.data || []);
         setLatestArticles(latestResponse.data || []);
 
         // Load popular articles in background (non-blocking)
-        articlesApi.getAll({ page: 1, pageSize: 10 }).then((popularResponse) => {
-          const articlesData = popularResponse.data || [];
-          const sorted = [...articlesData].sort(
-            (a, b) => (b.viewCount || b.ViewCount || 0) - (a.viewCount || a.ViewCount || 0)
-          );
-          setPopularArticles(sorted.slice(0, 6));
-        });
+        articlesApi
+          .getAll({ page: 1, pageSize: 10 })
+          .then((popularResponse) => {
+            const articlesData = popularResponse.data || [];
+            const sorted = [...articlesData].sort(
+              (a, b) =>
+                (b.viewCount || b.ViewCount || 0) -
+                (a.viewCount || a.ViewCount || 0)
+            );
+            setPopularArticles(sorted.slice(0, 6));
+          });
 
         // Load category articles in parallel
         const categoryData = {};
@@ -122,12 +132,12 @@ const Home = () => {
 
   const getBadgeClass = (category) => {
     if (!category) return "";
-    
+
     try {
-      const categoryName = category.toLowerCase 
-        ? category.toLowerCase() 
+      const categoryName = category.toLowerCase
+        ? category.toLowerCase()
         : String(category).toLowerCase();
-      
+
       switch (categoryName) {
         case "dojave":
           return "urgent";
@@ -152,7 +162,7 @@ const Home = () => {
 
   const getCategoryIcon = (category) => {
     if (!category) return null;
-    
+
     try {
       const categoryName = String(category).toLowerCase();
       switch (categoryName) {
@@ -178,10 +188,9 @@ const Home = () => {
   };
 
   const getCategoryHeaderIcon = (categorySlug) => {
-    if (!categorySlug) return (
-      <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />
-    );
-    
+    if (!categorySlug)
+      return <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />;
+
     try {
       const slug = String(categorySlug).toLowerCase();
       switch (slug) {
@@ -202,9 +211,7 @@ const Home = () => {
       }
     } catch (error) {
       console.error("Error in getCategoryHeaderIcon:", error);
-      return (
-        <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />
-      );
+      return <Newspaper size={24} style={{ color: "var(--text-secondary)" }} />;
     }
   };
 
@@ -218,15 +225,18 @@ const Home = () => {
     );
   }
 
-  const featuredArticle = latestArticles && latestArticles.length > 0 ? latestArticles[0] : null;
+  const featuredArticle =
+    latestArticles && latestArticles.length > 0 ? latestArticles[0] : null;
 
   const getArticleProperty = (article, prop) => {
     if (!article) return "";
-    
-    return article[prop] || 
-           article[prop.charAt(0).toUpperCase() + prop.slice(1)] || 
-           article[prop.toLowerCase()] || 
-           "";
+
+    return (
+      article[prop] ||
+      article[prop.charAt(0).toUpperCase() + prop.slice(1)] ||
+      article[prop.toLowerCase()] ||
+      ""
+    );
   };
 
   return (
@@ -236,7 +246,11 @@ const Home = () => {
           <div className="container">
             <div
               className="featured-card gradient-border hover-lift"
-              onClick={() => navigate(`/clanak/${getArticleProperty(featuredArticle, 'slug')}`)}
+              onClick={() =>
+                navigate(
+                  `/clanak/${getArticleProperty(featuredArticle, "slug")}`
+                )
+              }
               onMouseEnter={() => setFeaturedHovered(true)}
               onMouseLeave={() => setFeaturedHovered(false)}
               style={{
@@ -256,10 +270,12 @@ const Home = () => {
                 }}
               >
                 <img
-                  src={getArticleProperty(featuredArticle, 'primaryImageUrl') || 
-                       getArticleProperty(featuredArticle, 'PrimaryImageUrl') || 
-                       "/placeholder.jpg"}
-                  alt={getArticleProperty(featuredArticle, 'title')}
+                  src={
+                    getArticleProperty(featuredArticle, "primaryImageUrl") ||
+                    getArticleProperty(featuredArticle, "PrimaryImageUrl") ||
+                    "/placeholder.jpg"
+                  }
+                  alt={getArticleProperty(featuredArticle, "title")}
                   style={{
                     width: "100%",
                     height: "100%",
@@ -291,11 +307,13 @@ const Home = () => {
               <div className="featured-overlay">
                 <span
                   className={`badge ${getBadgeClass(
-                    getArticleProperty(featuredArticle, 'categoryName')
+                    getArticleProperty(featuredArticle, "categoryName")
                   )}`}
                 >
-                  {getCategoryIcon(getArticleProperty(featuredArticle, 'categoryName'))}
-                  {getArticleProperty(featuredArticle, 'categoryName')}
+                  {getCategoryIcon(
+                    getArticleProperty(featuredArticle, "categoryName")
+                  )}
+                  {getArticleProperty(featuredArticle, "categoryName")}
                 </span>
                 <h2
                   style={{
@@ -309,7 +327,7 @@ const Home = () => {
                       : "translateY(0)",
                   }}
                 >
-                  {getArticleProperty(featuredArticle, 'title')}
+                  {getArticleProperty(featuredArticle, "title")}
                 </h2>
                 <div
                   className="meta-info"
@@ -330,7 +348,7 @@ const Home = () => {
                     }}
                   >
                     <User size={16} />
-                    {getArticleProperty(featuredArticle, 'authorName')}
+                    {getArticleProperty(featuredArticle, "authorName")}
                   </span>
                   <span
                     className="meta-item"
@@ -341,9 +359,11 @@ const Home = () => {
                     }}
                   >
                     <Calendar size={16} />
-                    {getArticleProperty(featuredArticle, 'publishedAt') &&
+                    {getArticleProperty(featuredArticle, "publishedAt") &&
                       format(
-                        new Date(getArticleProperty(featuredArticle, 'publishedAt')),
+                        new Date(
+                          getArticleProperty(featuredArticle, "publishedAt")
+                        ),
                         "d. MMM yyyy",
                         { locale: bs }
                       )}
@@ -357,7 +377,7 @@ const Home = () => {
                     }}
                   >
                     <Eye size={16} />
-                    {getArticleProperty(featuredArticle, 'viewCount') || 0}
+                    {getArticleProperty(featuredArticle, "viewCount") || 0}
                   </span>
                   {featuredHovered && (
                     <span
@@ -623,8 +643,9 @@ const Home = () => {
           </style>
         </section>
       )}
-      
-      {!searchQuery && categories.length > 0 && (
+
+      {!searchQuery &&
+        categories.length > 0 &&
         categories.map((category, categoryIndex) => {
           const categorySlug = category.slug || category.Slug || "";
           const articles = categoryArticles[categorySlug] || [];
@@ -693,8 +714,7 @@ const Home = () => {
               </div>
             </section>
           );
-        })
-      )}
+        })}
 
       {!searchQuery && (
         <section
