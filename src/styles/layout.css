@@ -187,6 +187,7 @@
   background: var(--bg-secondary);
   border-top: 1px solid var(--border);
   width: 100%;
+  padding-bottom: 0; /* Reset any padding */
 }
 
 .footer-content {
@@ -280,8 +281,13 @@
     gap: 1rem;
   }
 
+  /* Add padding to footer to account for bottom nav */
+  .footer {
+    padding-bottom: 5rem; /* Space for bottom nav */
+  }
+
   .footer-content {
-    padding: 2rem 1rem;
+    padding: 2rem 1.5rem 1rem 1.5rem; /* More side padding */
   }
 
   .footer-grid {
@@ -322,12 +328,25 @@
     height: 65px;
   }
 
+  /* Extra padding for smaller phones */
+  .footer {
+    padding-bottom: 6rem; /* More space for bottom nav */
+  }
+
   .footer-content {
-    padding: 1.5rem 0.75rem;
+    padding: 1.5rem 1rem 0.5rem 1rem;
   }
 
   .footer-grid {
     gap: 1.5rem;
+  }
+
+  .footer-section h3 {
+    font-size: 0.9rem;
+  }
+
+  .footer-links-vertical a {
+    font-size: 0.85rem;
   }
 }
 

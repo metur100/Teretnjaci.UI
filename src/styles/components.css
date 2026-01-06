@@ -513,20 +513,21 @@ select.form-control {
     min-height: 1px;
   }
 }
+
 /* Loading */
 .loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  min-height: calc(100vh - 100px); /* Increased from 200px */
   gap: 1rem;
   text-align: center;
   padding: 4rem;
 }
 
 .loading.spinner-only {
-  min-height: 200px;
+  min-height: calc(100vh - 100px); /* Increased from 200px */
 }
 
 .spinner {
@@ -536,6 +537,29 @@ select.form-control {
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+/* Add loading container wrapper */
+.loading-container {
+  min-height: calc(100vh - 100px); /* Increased from 200px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile specific loading fix */
+@media (max-width: 768px) {
+  .loading {
+    min-height: calc(100vh - 150px); /* Increased from 250px - account for bottom nav */
+  }
+  
+  .loading.spinner-only {
+    min-height: calc(100vh - 150px); /* Increased from 250px */
+  }
+  
+  .loading-container {
+    min-height: calc(100vh - 150px); /* Increased from 250px */
+  }
 }
 
 /* Empty State */

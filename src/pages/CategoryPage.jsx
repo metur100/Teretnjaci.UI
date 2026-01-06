@@ -140,14 +140,16 @@ const CategoryPage = () => {
     }
   };
 
-  if (loading) {
-    return (
+if (loading) {
+  return (
+    <div className="loading-container">
       <div className="loading">
         <div className="spinner"></div>
         <p>Učitavanje članaka...</p>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (!category) {
     return (

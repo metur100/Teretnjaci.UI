@@ -226,13 +226,15 @@ const Home = () => {
     }
   };
 
-  if (loading) {
-    return (
+if (loading) {
+  return (
+    <div className="loading-container">
       <div className="loading">
         <div className="spinner"></div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   // FIX: Check if latestArticles exists and has items
   const featuredArticle = latestArticles && latestArticles.length > 0 ? latestArticles[0] : null;

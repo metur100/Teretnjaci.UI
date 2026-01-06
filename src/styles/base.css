@@ -33,6 +33,13 @@ main {
   width: 100%;
   display: flex;
   flex-direction: column;
+  min-height: calc(100vh - 100px); 
+}
+
+@media (max-width: 768px) {
+  main {
+    min-height: calc(100vh - 150px); 
+  }
 }
 
 a {
