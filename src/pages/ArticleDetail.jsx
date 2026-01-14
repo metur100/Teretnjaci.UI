@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { articlesApi } from '../services/api';
 import { format } from 'date-fns';
 import { bs } from 'date-fns/locale';
@@ -62,7 +63,6 @@ const ArticleDetail = () => {
       setLoading(false);
     }
   };
-  
 
   const handleImageError = (imageId) => {
     setImageError(prev => ({ ...prev, [imageId]: true }));
@@ -201,19 +201,26 @@ const ArticleDetail = () => {
 
   if (!article) {
     return (
-      <div className="container" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
-        <h2 style={{ marginBottom: '1rem' }}>❌ Članak nije pronađen</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-          Članak koji tražite možda je premješten ili obrisan.
-        </p>
-        <Link to="/" className="btn btn-secondary">
-          <ArrowLeft size={18} />
-          Povratak na početnu
-        </Link>
-      </div>
+      <>
+        <Helmet>
+          <title>Članak nije pronađen - Teretnjaci.ba</title>
+          <meta name="description" content="Traženi članak nije pronađen." />
+        </Helmet>
+        <div className="container" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
+          <h2 style={{ marginBottom: '1rem' }}>❌ Članak nije pronađen</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+            Članak koji tražite možda je premješten ili obrisan.
+          </p>
+          <Link to="/" className="btn btn-secondary">
+            <ArrowLeft size={18} />
+            Povratak na početnu
+          </Link>
+        </div>
+      </>
     );
   }
 
+  // Get article data
   const categoryName = getArticleProperty('categoryName');
   const categorySlug = getArticleProperty('categorySlug');
   const title = getArticleProperty('title');
@@ -223,8 +230,56 @@ const ArticleDetail = () => {
   const images = article.images || article.Images || [];
   const content = getArticleProperty('content');
 
+  // Prepare Open Graph data
+  const ogImage = images.length > 0 
+    ? (images.find(img => img.IsPrimary || img.isPrimary)?.Url || images.find(img => img.IsPrimary || img.isPrimary)?.url || images[0].Url || images[0].url || images[0].FilePath)
+    : 'https://teretnjaci.ba/default-og-image.jpg';
+  
+  const currentUrl = `https://teretnjaci.ba/clanak/${slug}`;
+  
+  // Create description from content (strip HTML and limit to 160 chars)
+  const createDescription = (htmlContent) => {
+    if (!htmlContent) return 'Teretnjaci.ba - Vijesti, saobraćaj i pomoć';
+    const text = htmlContent.replace(/<[^>]*>/g, '').trim();
+    return text.length > 160 ? text.substring(0, 160) + '...' : text;
+  };
+  
+  const description = createDescription(content);
+
   return (
     <div className="article-detail">
+      {/* SEO and Open Graph Meta Tags */}
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{title} - Teretnjaci.ba</title>
+        <meta name="title" content={`${title} - Teretnjaci.ba`} />
+        <meta name="description" content={description} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={currentUrl} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:secure_url" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="Teretnjaci.ba" />
+        {publishedAt && <meta property="article:published_time" content={new Date(publishedAt).toISOString()} />}
+        {authorName && <meta property="article:author" content={authorName} />}
+        {categoryName && <meta property="article:section" content={categoryName} />}
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={currentUrl} />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImage} />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={currentUrl} />
+      </Helmet>
+
       <div className="article-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
           <div>
