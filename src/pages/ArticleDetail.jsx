@@ -62,6 +62,7 @@ const ArticleDetail = () => {
       setLoading(false);
     }
   };
+  
 
   const handleImageError = (imageId) => {
     setImageError(prev => ({ ...prev, [imageId]: true }));
@@ -129,7 +130,7 @@ const ArticleDetail = () => {
   };
 
   const getShareUrl = () => {
-    return window.location.href;
+    return `https://teretnjaci.ba/clanak/${slug}`;
   };
 
   const handleShare = async () => {
