@@ -206,7 +206,7 @@ const ArticleDetail = () => {
         <Helmet>
           <title>Članak nije pronađen - Teretnjaci.ba</title>
           <meta property="og:title" content="Teretnjaci.ba" />
-          <meta property="og:image" content="https://teretnjaci.ba/default-og-image.jpg" />
+          <meta property="og:image" content="https://i.ibb.co/wFNwCtMZ/441a68a4f946.png" />
           <meta name="description" content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć" />
         </Helmet>
         <div className="container" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
@@ -236,7 +236,7 @@ const ArticleDetail = () => {
   // Get the primary or first image for Open Graph
   const primaryImage = images.find(img => img.IsPrimary || img.isPrimary);
   const firstImage = images[0];
-  const ogImage = primaryImage?.Url || primaryImage?.url || firstImage?.Url || firstImage?.url || 'https://teretnjaci.ba/default-og-image.jpg';
+  const ogImage = primaryImage?.Url || primaryImage?.url || firstImage?.Url || firstImage?.url || 'https://i.ibb.co/wFNwCtMZ/441a68a4f946.png';
 
   return (
     <div className="article-detail">
