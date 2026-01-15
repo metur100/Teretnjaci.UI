@@ -233,10 +233,12 @@ const ArticleDetail = () => {
   const images = article.images || article.Images || [];
   const content = getArticleProperty('content');
 
-  // Get the primary or first image for Open Graph
-  const primaryImage = images.find(img => img.IsPrimary || img.isPrimary);
-  const firstImage = images[0];
-  const ogImage = primaryImage?.Url || primaryImage?.url || firstImage?.Url || firstImage?.url || 'https://i.ibb.co/wFNwCtMZ/441a68a4f946.png';
+
+const primaryImage = images.find(img => img.IsPrimary || img.isPrimary);
+const firstImage = images[0];
+const ogImage = primaryImage?.FilePath || primaryImage?.Url || 
+                 firstImage?.FilePath || firstImage?.Url || 
+                 'https://i.ibb.co/wFNwCtMZ/441a68a4f946.png';
 
   return (
     <div className="article-detail">
