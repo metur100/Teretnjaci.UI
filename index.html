@@ -4,68 +4,11 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    
-    <!-- Dynamic placeholders -->
-    <meta property="og:title" content="{{og:title}}">
-    <meta property="og:image" content="{{og:image}}">
-    <meta property="og:description" content="{{og:description}}">
-    <meta property="og:url" content="{{og:url}}">
-    <meta property="og:type" content="{{og:type}}">
-    <meta name="description" content="{{description}}" />
-    <title>{{title}}</title>
-    
-    <!-- Fallback values (will be replaced by server) -->
-    <script id="default-meta" type="application/json">
-      {
-        "title": "Teretnjaci.ba",
-        "description": "Teretnjaci.ba - Vijesti, saobraćaj i pomoć",
-        "image": "https://i.ibb.co/wFNwCtMZ/441a68a4f946.png",
-        "url": "https://teretnjaci.ba",
-        "type": "website"
-      }
-    </script>
-    
-    <!-- Script to update meta tags on client side -->
-    <script>
-      // Parse initial meta from URL or localStorage
-      window.initialMeta = (function() {
-        try {
-          // Check if meta data was injected by server
-          if (window.serverMeta) {
-            return window.serverMeta;
-          }
-          
-          // Check URL parameters
-          const params = new URLSearchParams(window.location.search);
-          const metaParam = params.get('meta');
-          if (metaParam) {
-            return JSON.parse(decodeURIComponent(metaParam));
-          }
-          
-          // Fallback to defaults
-          const defaultMeta = document.getElementById('default-meta');
-          return JSON.parse(defaultMeta.textContent);
-        } catch (e) {
-          console.error('Error parsing meta:', e);
-          return {
-            title: "Teretnjaci.ba",
-            description: "Teretnjaci.ba - Vijesti, saobraćaj i pomoć",
-            image: "https://i.ibb.co/wFNwCtMZ/441a68a4f946.png",
-            url: window.location.href,
-            type: "website"
-          };
-        }
-      })();
-      
-      // Update meta tags immediately
-      document.title = window.initialMeta.title;
-      document.querySelector('meta[name="description"]').content = window.initialMeta.description;
-      document.querySelector('meta[property="og:title"]').content = window.initialMeta.title;
-      document.querySelector('meta[property="og:image"]').content = window.initialMeta.image;
-      document.querySelector('meta[property="og:description"]').content = window.initialMeta.description;
-      document.querySelector('meta[property="og:url"]').content = window.initialMeta.url;
-      document.querySelector('meta[property="og:type"]').content = window.initialMeta.type;
-    </script>
+    <meta property="og:title" content="Samo je jedan original - Teretnjaci.ba">
+    <meta property="og:image" content="https://i.ibb.co/wFNwCtMZ/441a68a4f946.png">
+    <meta property="og:description" content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć">
+    <meta name="description" content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć" />
+    <title>Teretnjaci.ba</title>
   </head>
   <body>
     <div id="root"></div>
