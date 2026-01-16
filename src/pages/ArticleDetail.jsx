@@ -16,11 +16,10 @@ import {
   ArrowLeft, 
   Image as ImageIcon,
   Share2,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Link2,
-  Check
+  MessageCircle,
+  Copy,
+  Check,
+  X
 } from 'lucide-react';
 
 const ArticleDetail = () => {
@@ -63,7 +62,6 @@ const ArticleDetail = () => {
       setLoading(false);
     }
   };
-  
 
   const handleImageError = (imageId) => {
     setImageError(prev => ({ ...prev, [imageId]: true }));
@@ -136,6 +134,7 @@ const ArticleDetail = () => {
 
   const handleShare = async () => {
     const title = getArticleProperty('title');
+    const text = `Pročitajte: ${title}`;
     const url = getShareUrl();
 
     // Try native share API first (works on mobile)
@@ -143,7 +142,7 @@ const ArticleDetail = () => {
       try {
         await navigator.share({
           title: title,
-          text: `Pročitajte: ${title}`,
+          text: text,
           url: url,
         });
         return;
@@ -154,13 +153,26 @@ const ArticleDetail = () => {
       }
     }
 
+    // For Android/Web: Fallback to Web Share API with text/URL
+    if (navigator.canShare && navigator.canShare({ text: `${text} ${url}` })) {
+      try {
+        await navigator.share({
+          text: `${text} ${url}`,
+        });
+        return;
+      } catch (error) {
+        console.error('Error sharing with text only:', error);
+      }
+    }
+
     // Fallback to custom share menu
-    setShowShareMenu(!showShareMenu);
+    setShowShareMenu(true);
   };
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(getShareUrl());
+      const shareUrl = getShareUrl();
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
@@ -168,26 +180,41 @@ const ArticleDetail = () => {
       }, 2000);
     } catch (error) {
       console.error('Error copying to clipboard:', error);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = getShareUrl();
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopied(true);
+        setTimeout(() => {
+          setCopied(false);
+          setShowShareMenu(false);
+        }, 2000);
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+      }
+      document.body.removeChild(textArea);
     }
   };
 
-  const shareOnFacebook = () => {
-    const url = encodeURIComponent(getShareUrl());
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-    setShowShareMenu(false);
+  const shareViaMessenger = () => {
+    const shareUrl = getShareUrl();
+    const text = encodeURIComponent(`Pročitajte ovaj članak: ${getArticleProperty('title')}\n\n${shareUrl}`);
+    window.open(`fb-messenger://share?link=${encodeURIComponent(shareUrl)}`, '_blank');
   };
 
-  const shareOnTwitter = () => {
-    const url = encodeURIComponent(getShareUrl());
-    const text = encodeURIComponent(getArticleProperty('title'));
-    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
-    setShowShareMenu(false);
+  const shareViaWhatsApp = () => {
+    const shareUrl = getShareUrl();
+    const text = encodeURIComponent(`Pročitajte ovaj članak: ${getArticleProperty('title')}\n\n${shareUrl}`);
+    window.open(`whatsapp://send?text=${text}`, '_blank');
   };
 
-  const shareOnLinkedIn = () => {
-    const url = encodeURIComponent(getShareUrl());
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
-    setShowShareMenu(false);
+  const shareViaSMS = () => {
+    const shareUrl = getShareUrl();
+    const text = encodeURIComponent(`Pročitajte ovaj članak: ${getArticleProperty('title')}\n\n${shareUrl}`);
+    window.open(`sms:?body=${text}`, '_blank');
   };
 
   if (loading) {
@@ -233,10 +260,9 @@ const ArticleDetail = () => {
   const images = article.images || article.Images || [];
   const content = getArticleProperty('content');
 
-
-const primaryImage = images.find(img => img.IsPrimary || img.isPrimary);
-const firstImage = images[0];
-const ogImage = primaryImage?.FilePath || primaryImage?.Url || 
+  const primaryImage = images.find(img => img.IsPrimary || img.isPrimary);
+  const firstImage = images[0];
+  const ogImage = primaryImage?.FilePath || primaryImage?.Url || 
                  firstImage?.FilePath || firstImage?.Url || 
                  'https://i.ibb.co/wFNwCtMZ/441a68a4f946.png';
 
@@ -291,6 +317,7 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
             {showShareMenu && (
               <>
                 <div 
+                  className="share-overlay"
                   style={{
                     position: 'fixed',
                     top: 0,
@@ -298,138 +325,226 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
                     right: 0,
                     bottom: 0,
                     zIndex: 999,
+                    background: 'rgba(0, 0, 0, 0.5)',
+                    animation: 'fadeIn 0.2s ease',
                   }}
                   onClick={() => setShowShareMenu(false)}
                 />
                 <div
                   className="share-menu"
                   style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 0.5rem)',
-                    right: 0,
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
                     background: 'var(--bg-card)',
                     border: '1px solid var(--border)',
-                    borderRadius: '0.75rem',
-                    padding: '0.5rem',
-                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+                    borderRadius: '1rem',
+                    padding: '1.5rem',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
                     zIndex: 1000,
-                    minWidth: '200px',
+                    minWidth: '280px',
+                    maxWidth: '90vw',
+                    animation: 'slideUp 0.3s ease',
                   }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <button
-                    onClick={shareOnFacebook}
-                    className="share-option"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem',
-                      transition: 'background 0.2s',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'}
-                    onMouseLeave={(e) => e.target.style.background = 'none'}
-                  >
-                    <Facebook size={20} style={{ color: '#1877f2' }} />
-                    Facebook
-                  </button>
-                  
-                  <button
-                    onClick={shareOnTwitter}
-                    className="share-option"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem',
-                      transition: 'background 0.2s',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'}
-                    onMouseLeave={(e) => e.target.style.background = 'none'}
-                  >
-                    <Twitter size={20} style={{ color: '#1da1f2' }} />
-                    Twitter
-                  </button>
-                  
-                  <button
-                    onClick={shareOnLinkedIn}
-                    className="share-option"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem',
-                      transition: 'background 0.2s',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'}
-                    onMouseLeave={(e) => e.target.style.background = 'none'}
-                  >
-                    <Linkedin size={20} style={{ color: '#0a66c2' }} />
-                    LinkedIn
-                  </button>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
+                      Podijeli članak
+                    </h3>
+                    <button
+                      onClick={() => setShowShareMenu(false)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        padding: '0.25rem',
+                        borderRadius: '0.25rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
                   
                   <div style={{ 
-                    height: '1px', 
-                    background: 'var(--border)', 
-                    margin: '0.5rem 0' 
-                  }} />
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '1rem',
+                    marginBottom: '1.5rem'
+                  }}>
+                    {/* WhatsApp */}
+                    <button
+                      onClick={shareViaWhatsApp}
+                      className="share-app-btn"
+                      style={{
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        background: 'none',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        borderRadius: '0.75rem',
+                        transition: 'all 0.2s',
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                      }}
+                      onMouseEnter={(e) => e.target.style.background = 'rgba(37, 211, 102, 0.1)'}
+                      onMouseLeave={(e) => e.target.style.background = 'none'}
+                    >
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: '#25D366',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '24px',
+                        fontWeight: 'bold'
+                      }}>
+                        WA
+                      </div>
+                      WhatsApp
+                    </button>
+                    
+                    {/* Messenger */}
+                    <button
+                      onClick={shareViaMessenger}
+                      className="share-app-btn"
+                      style={{
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        background: 'none',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        borderRadius: '0.75rem',
+                        transition: 'all 0.2s',
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                      }}
+                      onMouseEnter={(e) => e.target.style.background = 'rgba(0, 132, 255, 0.1)'}
+                      onMouseLeave={(e) => e.target.style.background = 'none'}
+                    >
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: '#0084FF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '20px'
+                      }}>
+                        <MessageCircle size={24} />
+                      </div>
+                      Messenger
+                    </button>
+                    
+                    {/* SMS */}
+                    <button
+                      onClick={shareViaSMS}
+                      className="share-app-btn"
+                      style={{
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        background: 'none',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        borderRadius: '0.75rem',
+                        transition: 'all 0.2s',
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                      }}
+                      onMouseEnter={(e) => e.target.style.background = 'rgba(121, 121, 121, 0.1)'}
+                      onMouseLeave={(e) => e.target.style.background = 'none'}
+                    >
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: '#797979',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '20px'
+                      }}>
+                        SMS
+                      </div>
+                      Poruka
+                    </button>
+                    
+                    {/* Copy Link */}
+                    <button
+                      onClick={copyToClipboard}
+                      className="share-app-btn"
+                      style={{
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        background: copied ? 'rgba(46, 204, 113, 0.1)' : 'none',
+                        border: copied ? '1px solid var(--success)' : '1px solid var(--border)',
+                        color: copied ? 'var(--success)' : 'var(--text-primary)',
+                        cursor: 'pointer',
+                        borderRadius: '0.75rem',
+                        transition: 'all 0.2s',
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                      }}
+                      onMouseEnter={(e) => !copied && (e.target.style.background = 'rgba(0, 119, 255, 0.1)')}
+                      onMouseLeave={(e) => !copied && (e.target.style.background = 'none')}
+                    >
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: copied ? 'var(--success)' : 'var(--primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '20px'
+                      }}>
+                        {copied ? <Check size={24} /> : <Copy size={24} />}
+                      </div>
+                      {copied ? 'Kopirano!' : 'Kopiraj link'}
+                    </button>
+                  </div>
                   
-                  <button
-                    onClick={copyToClipboard}
-                    className="share-option"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      background: 'none',
-                      border: 'none',
-                      color: copied ? 'var(--success)' : 'var(--text-primary)',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem',
-                      transition: 'all 0.2s',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => !copied && (e.target.style.background = 'var(--bg-tertiary)')}
-                    onMouseLeave={(e) => e.target.style.background = 'none'}
-                  >
-                    {copied ? (
-                      <>
-                        <Check size={20} />
-                        Kopirano!
-                      </>
-                    ) : (
-                      <>
-                        <Link2 size={20} />
-                        Kopiraj link
-                      </>
-                    )}
-                  </button>
+                  <div style={{ 
+                    fontSize: '0.85rem', 
+                    color: 'var(--text-secondary)', 
+                    textAlign: 'center',
+                    borderTop: '1px solid var(--border)',
+                    paddingTop: '1rem'
+                  }}>
+                    Link će biti kopiran i možete ga podijeliti u bilo kojoj aplikaciji
+                  </div>
                 </div>
               </>
             )}
@@ -497,6 +612,36 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
           Povratak na početnu
         </Link>
       </div>
+
+      {/* Add some CSS animations */}
+      <style>
+        {`
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          
+          @keyframes slideUp {
+            from { 
+              opacity: 0;
+              transform: translate(-50%, -40%);
+            }
+            to { 
+              opacity: 1;
+              transform: translate(-50%, -50%);
+            }
+          }
+          
+          .share-app-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          }
+          
+          .share-app-btn:active {
+            transform: translateY(0);
+          }
+        `}
+      </style>
     </div>
   );
 };
