@@ -134,29 +134,35 @@ const ArticleDetail = () => {
     return `https://teretnjaci.ba/clanak/${slug}`;
   };
 
-  const handleShare = async () => {
-    const title = getArticleProperty('title');
-    const url = getShareUrl();
+const handleShare = async () => {
+  const title = getArticleProperty('title');
+  const url = getShareUrl();
 
-    // Try native share API first (works on mobile)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: title,
-          text: `Pročitajte: ${title}`,
-          url: url,
-        });
-        return;
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error('Error sharing:', error);
-        }
+  // Native share (Android & iOS)
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title,
+        text: title,
+        url,
+      });
+      return;
+    } catch (err) {
+      // User cancelled → do nothing
+      if (err.name !== 'AbortError') {
+        console.error('Share error:', err);
       }
     }
+  }
 
-    // Fallback to custom share menu
-    setShowShareMenu(!showShareMenu);
-  };
+  // Desktop fallback
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('Link je kopiran');
+  } catch {
+    window.open(url, '_blank');
+  }
+};
 
   const copyToClipboard = async () => {
     try {
@@ -297,155 +303,7 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
               }}
             >
               <Share2 size={18} />
-              <span className="desktop-only">Podijeli</span>
-            </button>
-
-            {/* Share Menu */}
-            {showShareMenu && (
-              <>
-                <div 
-                  style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    zIndex: 999,
-                  }}
-                  onClick={() => setShowShareMenu(false)}
-                />
-                <div
-                  className="share-menu"
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 0.5rem)',
-                    right: 0,
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '0.75rem',
-                    padding: '0.5rem',
-                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
-                    zIndex: 1000,
-                    minWidth: '200px',
-                  }}
-                >
-                  <button
-                    onClick={shareOnFacebook}
-                    className="share-option"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem',
-                      transition: 'background 0.2s',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'}
-                    onMouseLeave={(e) => e.target.style.background = 'none'}
-                  >
-                    <Facebook size={20} style={{ color: '#1877f2' }} />
-                    Facebook
-                  </button>
-                  
-                  <button
-                    onClick={shareOnTwitter}
-                    className="share-option"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem',
-                      transition: 'background 0.2s',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'}
-                    onMouseLeave={(e) => e.target.style.background = 'none'}
-                  >
-                    <Twitter size={20} style={{ color: '#1da1f2' }} />
-                    Twitter
-                  </button>
-                  
-                  <button
-                    onClick={shareOnLinkedIn}
-                    className="share-option"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem',
-                      transition: 'background 0.2s',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => e.target.style.background = 'var(--bg-tertiary)'}
-                    onMouseLeave={(e) => e.target.style.background = 'none'}
-                  >
-                    <Linkedin size={20} style={{ color: '#0a66c2' }} />
-                    LinkedIn
-                  </button>
-                  
-                  <div style={{ 
-                    height: '1px', 
-                    background: 'var(--border)', 
-                    margin: '0.5rem 0' 
-                  }} />
-                  
-                  <button
-                    onClick={copyToClipboard}
-                    className="share-option"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      background: 'none',
-                      border: 'none',
-                      color: copied ? 'var(--success)' : 'var(--text-primary)',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem',
-                      transition: 'all 0.2s',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                    }}
-                    onMouseEnter={(e) => !copied && (e.target.style.background = 'var(--bg-tertiary)')}
-                    onMouseLeave={(e) => e.target.style.background = 'none'}
-                  >
-                    {copied ? (
-                      <>
-                        <Check size={20} />
-                        Kopirano!
-                      </>
-                    ) : (
-                      <>
-                        <Link2 size={20} />
-                        Kopiraj link
-                      </>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
+            </button> 
           </div>
         </div>
 
