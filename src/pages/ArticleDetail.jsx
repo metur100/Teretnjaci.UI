@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { articlesApi } from '../services/api';
-import { format } from 'date-fns';
-import { bs } from 'date-fns/locale';
-import { 
-  Eye, 
-  Calendar, 
-  User, 
-  AlertTriangle, 
-  HandHelping, 
-  Megaphone, 
-  Navigation, 
-  Newspaper, 
-  ArrowLeft, 
+import { useState, useEffect } from "react";
+import { useParams, Link, useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { articlesApi } from "../services/api";
+import { format } from "date-fns";
+import { bs } from "date-fns/locale";
+import {
+  Eye,
+  Calendar,
+  User,
+  AlertTriangle,
+  HandHelping,
+  Megaphone,
+  Navigation,
+  Newspaper,
+  ArrowLeft,
   Image as ImageIcon,
   Share2,
   Facebook,
   Twitter,
   Linkedin,
   Link2,
-  Check
-} from 'lucide-react';
+  Check,
+} from "lucide-react";
 
 const ArticleDetail = () => {
   const { slug } = useParams();
@@ -34,12 +34,14 @@ const ArticleDetail = () => {
 
   // Scroll to top on component mount and when slug changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: "instant" });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-    
+
     if (window.ReactNativeWebView) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'SCROLL_TO_TOP' }));
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({ type: "SCROLL_TO_TOP" })
+      );
     }
   }, [slug, location.key]);
 
@@ -52,33 +54,35 @@ const ArticleDetail = () => {
       setLoading(true);
       const response = await articlesApi.getBySlug(slug);
       setArticle(response.data || null);
-      
+
       setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        window.scrollTo({ top: 0, behavior: "instant" });
       }, 50);
     } catch (error) {
-      console.error('Error loading article:', error);
+      console.error("Error loading article:", error);
       setArticle(null);
     } finally {
       setLoading(false);
     }
   };
-  
 
   const handleImageError = (imageId) => {
-    setImageError(prev => ({ ...prev, [imageId]: true }));
+    setImageError((prev) => ({ ...prev, [imageId]: true }));
   };
 
   const getArticleProperty = (prop) => {
     if (!article) return "";
-    return article[prop] || 
-           article[prop.charAt(0).toUpperCase() + prop.slice(1)] || 
-           article[prop.toLowerCase()] || "";
+    return (
+      article[prop] ||
+      article[prop.charAt(0).toUpperCase() + prop.slice(1)] ||
+      article[prop.toLowerCase()] ||
+      ""
+    );
   };
 
   const getBadgeClass = (category) => {
     if (!category) return "";
-    
+
     try {
       const categoryName = String(category).toLowerCase();
       switch (categoryName) {
@@ -105,7 +109,7 @@ const ArticleDetail = () => {
 
   const getCategoryIcon = (category) => {
     if (!category) return null;
-    
+
     try {
       const categoryName = String(category).toLowerCase();
       switch (categoryName) {
@@ -134,79 +138,31 @@ const ArticleDetail = () => {
     return `https://teretnjaci.ba/clanak/${slug}`;
   };
 
-const handleShare = async () => {
-  const title = getArticleProperty('title');
-  const url = getShareUrl();
+  const handleShare = async () => {
+    const title = getArticleProperty("title");
+    const url = getShareUrl();
 
-  // Native share (Android & iOS)
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title,
-        text: title,
-        url,
-      });
-      return;
-    } catch (err) {
-      // User cancelled → do nothing
-      if (err.name !== 'AbortError') {
-        console.error('Share error:', err);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text: title,
+          url,
+        });
+        return;
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Share error:", err);
+        }
       }
     }
-  }
 
-  // Desktop fallback
-  try {
-    await navigator.clipboard.writeText(url);
-    alert('Link je kopiran');
-  } catch {
-    window.open(url, '_blank');
-  }
-};
-
-  const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(getShareUrl());
-      setCopied(true);
-      setTimeout(() => {
-        setCopied(false);
-        setShowShareMenu(false);
-      }, 2000);
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
+      await navigator.clipboard.writeText(url);
+      alert("Link je kopiran");
+    } catch {
+      window.open(url, "_blank");
     }
-  };
-
-const shareOnFacebook = async () => {
-  const url = getShareUrl();
-
-  if (navigator.share) {
-    try {
-      await navigator.share({ url });
-      return;
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  window.open(
-    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-    '_blank'
-  );
-};
-
-
-  const shareOnTwitter = () => {
-    const url = encodeURIComponent(getShareUrl());
-    const text = encodeURIComponent(getArticleProperty('title'));
-    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
-    setShowShareMenu(false);
-  };
-
-  const shareOnLinkedIn = () => {
-    const url = encodeURIComponent(getShareUrl());
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
-    setShowShareMenu(false);
   };
 
   if (loading) {
@@ -225,12 +181,21 @@ const shareOnFacebook = async () => {
         <Helmet>
           <title>Članak nije pronađen - Teretnjaci.ba</title>
           <meta property="og:title" content="Teretnjaci.ba" />
-          <meta property="og:image" content="https://i.ibb.co/wFNwCtMZ/441a68a4f946.png" />
-          <meta name="description" content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć" />
+          <meta
+            property="og:image"
+            content="https://i.ibb.co/wFNwCtMZ/441a68a4f946.png"
+          />
+          <meta
+            name="description"
+            content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć"
+          />
         </Helmet>
-        <div className="container" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
-          <h2 style={{ marginBottom: '1rem' }}>❌ Članak nije pronađen</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+        <div
+          className="container"
+          style={{ padding: "4rem 1rem", textAlign: "center" }}
+        >
+          <h2 style={{ marginBottom: "1rem" }}>❌ Članak nije pronađen</h2>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>
             Članak koji tražite možda je premješten ili obrisan.
           </p>
           <Link to="/" className="btn btn-secondary">
@@ -243,21 +208,23 @@ const shareOnFacebook = async () => {
   }
 
   // Get article data
-  const categoryName = getArticleProperty('categoryName');
-  const categorySlug = getArticleProperty('categorySlug');
-  const title = getArticleProperty('title');
-  const authorName = getArticleProperty('authorName');
-  const publishedAt = getArticleProperty('publishedAt');
-  const viewCount = getArticleProperty('viewCount') || 0;
+  const categoryName = getArticleProperty("categoryName");
+  const categorySlug = getArticleProperty("categorySlug");
+  const title = getArticleProperty("title");
+  const authorName = getArticleProperty("authorName");
+  const publishedAt = getArticleProperty("publishedAt");
+  const viewCount = getArticleProperty("viewCount") || 0;
   const images = article.images || article.Images || [];
-  const content = getArticleProperty('content');
+  const content = getArticleProperty("content");
 
-
-const primaryImage = images.find(img => img.IsPrimary || img.isPrimary);
-const firstImage = images[0];
-const ogImage = primaryImage?.FilePath || primaryImage?.Url || 
-                 firstImage?.FilePath || firstImage?.Url || 
-                 'https://i.ibb.co/wFNwCtMZ/441a68a4f946.png';
+  const primaryImage = images.find((img) => img.IsPrimary || img.isPrimary);
+  const firstImage = images[0];
+  const ogImage =
+    primaryImage?.FilePath ||
+    primaryImage?.Url ||
+    firstImage?.FilePath ||
+    firstImage?.Url ||
+    "https://i.ibb.co/wFNwCtMZ/441a68a4f946.png";
 
   return (
     <div className="article-detail">
@@ -266,11 +233,21 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
         <title>{title}</title>
         <meta property="og:title" content={title} />
         <meta property="og:image" content={ogImage} />
-        <meta name="description" content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć" />
+        <meta
+          name="description"
+          content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć"
+        />
       </Helmet>
 
       <div className="article-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "1rem",
+          }}
+        >
           <div>
             {categorySlug && (
               <Link to={`/kategorija/${categorySlug}`}>
@@ -287,23 +264,23 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
               </span>
             )}
           </div>
-          
+
           {/* Share Button */}
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: "relative" }}>
             <button
               onClick={handleShare}
               className="btn btn-secondary"
               style={{
-                padding: '0.75rem 1.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.9rem',
-                minHeight: 'auto',
+                padding: "0.75rem 1.25rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                fontSize: "0.9rem",
+                minHeight: "auto",
               }}
             >
               <Share2 size={18} />
-            </button> 
+            </button>
           </div>
         </div>
 
@@ -315,7 +292,8 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
           </span>
           <span className="meta-item">
             <Calendar size={18} />
-            {publishedAt && format(new Date(publishedAt), 'd. MMMM yyyy.', { locale: bs })}
+            {publishedAt &&
+              format(new Date(publishedAt), "d. MMMM yyyy.", { locale: bs })}
           </span>
           <span className="meta-item">
             <Eye size={18} />
@@ -331,9 +309,12 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
             const imageId = image.id || image.Id;
             const imageUrl = image.url || image.Url || image.FilePath;
             const fileName = image.fileName || image.FileName || "Slika";
-            
+
             return (
-              <div key={imageId || Math.random()} className="article-image-container">
+              <div
+                key={imageId || Math.random()}
+                className="article-image-container"
+              >
                 {!imageError[imageId] ? (
                   <img
                     src={imageUrl}
@@ -356,7 +337,7 @@ const ogImage = primaryImage?.FilePath || primaryImage?.Url ||
 
       {/* Article Content - Render as HTML */}
       {content && (
-        <div 
+        <div
           className="article-body article-content-html"
           dangerouslySetInnerHTML={{ __html: content }}
         />
