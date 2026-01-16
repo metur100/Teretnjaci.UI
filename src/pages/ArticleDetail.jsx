@@ -171,11 +171,24 @@ const ArticleDetail = () => {
     }
   };
 
-  const shareOnFacebook = () => {
-    const url = encodeURIComponent(getShareUrl());
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-    setShowShareMenu(false);
-  };
+const shareOnFacebook = async () => {
+  const url = getShareUrl();
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ url });
+      return;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  window.open(
+    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+    '_blank'
+  );
+};
+
 
   const shareOnTwitter = () => {
     const url = encodeURIComponent(getShareUrl());
