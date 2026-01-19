@@ -772,7 +772,7 @@ const Home = () => {
                 }}
               >
                 <a
-                  href="https://apps.apple.com/us/app/teretnjaci-ba/id6479563312"
+                  href="https://apps.apple.com/ch/app/teretnjaci-ba/id6757087248"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover-grow"
@@ -802,7 +802,7 @@ const Home = () => {
                   </div>
                 </a>
                 <a
-                  href="https://play.google.com/store/apps/details?id=com.isicdev.teretnjaciba&hl=hr"
+                  href="https://play.google.com/store/apps/details?id=com.certidevelopment.teretnjaci&hl=hr"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover-grow"
