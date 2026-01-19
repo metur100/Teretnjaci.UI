@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { LogIn } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { LogIn } from "lucide-react";
 import logo from "../../images/teretnjaci.png";
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const { login, user } = useAuth();
@@ -18,7 +18,7 @@ const AdminLogin = () => {
   // Check if user is already logged in
   useEffect(() => {
     if (user) {
-      const from = location.state?.from?.pathname || '/admin';
+      const from = location.state?.from?.pathname || "/admin";
       navigate(from, { replace: true });
     } else {
       setCheckingAuth(false);
@@ -27,11 +27,11 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     const result = await login(username, password);
-    
+
     if (result.success) {
       // Navigation handled by useEffect
     } else {
@@ -43,26 +43,33 @@ const AdminLogin = () => {
   // Show loading while checking auth status
   if (checkingAuth) {
     return (
-      <div style={{
-        minHeight: 'calc(var(--vh, 1vh) * 100)', // WebView compatible
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-        background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)'
-      }}>
-        <div style={{
-          maxWidth: '400px',
-          width: '100%',
-          backgroundColor: 'var(--bg-secondary)',
-          padding: '2rem',
-          borderRadius: '1rem',
-          border: '1px solid var(--border)',
-          boxShadow: '0 20px 60px var(--shadow)',
-          textAlign: 'center'
-        }}>
-          <div className="spinner" style={{ margin: '1rem auto' }}></div>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>Provjera autentikacije...</p>
+      <div
+        style={{
+          minHeight: "calc(var(--vh, 1vh) * 100)", // WebView compatible
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1rem",
+          background:
+            "linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "400px",
+            width: "100%",
+            backgroundColor: "var(--bg-secondary)",
+            padding: "2rem",
+            borderRadius: "1rem",
+            border: "1px solid var(--border)",
+            boxShadow: "0 20px 60px var(--shadow)",
+            textAlign: "center",
+          }}
+        >
+          <div className="spinner" style={{ margin: "1rem auto" }}></div>
+          <p style={{ color: "var(--text-secondary)", marginTop: "1rem" }}>
+            Provjera autentikacije...
+          </p>
         </div>
       </div>
     );
@@ -74,44 +81,63 @@ const AdminLogin = () => {
   }
 
   return (
-    <div style={{
-      minHeight: 'calc(var(--vh, 1vh) * 100)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem',
-      background: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)'
-    }}>
-      <div style={{
-        maxWidth: '400px',
-        width: '100%',
-        backgroundColor: 'var(--bg-secondary)',
-        padding: '2rem',
-        borderRadius: '1rem',
-        border: '1px solid var(--border)',
-        boxShadow: '0 20px 60px var(--shadow)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img 
-            src={logo} 
-            alt="Teretnjaci.ba" 
+    <div
+      style={{
+        minHeight: "calc(var(--vh, 1vh) * 100)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+        background:
+          "linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "400px",
+          width: "100%",
+          backgroundColor: "var(--bg-secondary)",
+          padding: "2rem",
+          borderRadius: "1rem",
+          border: "1px solid var(--border)",
+          boxShadow: "0 20px 60px var(--shadow)",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <h1
             style={{
-              width: '300px',
-              height: 'auto'
+              fontSize: "1.5rem",
+              fontWeight: "600",
+              color: "var(--text-primary)",
+              margin: 0,
             }}
-          />
+          >
+            Admin panel
+          </h1>
+
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "var(--text-secondary)",
+              marginTop: "0.25rem",
+            }}
+          >
+            Prijava za administratore
+          </p>
         </div>
 
         {error && (
-          <div style={{
-            backgroundColor: '#dc262620',
-            border: '1px solid #dc2626',
-            color: '#dc2626',
-            padding: '0.75rem',
-            borderRadius: '0.5rem',
-            marginBottom: '1rem',
-            fontSize: '0.875rem'
-          }}>
+          <div
+            style={{
+              backgroundColor: "#dc262620",
+              border: "1px solid #dc2626",
+              color: "#dc2626",
+              padding: "0.75rem",
+              borderRadius: "0.5rem",
+              marginBottom: "1rem",
+              fontSize: "0.875rem",
+            }}
+          >
             {error}
           </div>
         )}
@@ -146,11 +172,14 @@ const AdminLogin = () => {
             type="submit"
             className="btn btn-primary"
             disabled={loading}
-            style={{ width: '100%', justifyContent: 'center' }}
+            style={{ width: "100%", justifyContent: "center" }}
           >
             {loading ? (
               <>
-                <div className="spinner-small" style={{ marginRight: '0.5rem' }}></div>
+                <div
+                  className="spinner-small"
+                  style={{ marginRight: "0.5rem" }}
+                ></div>
                 Prijava...
               </>
             ) : (
@@ -162,8 +191,15 @@ const AdminLogin = () => {
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <a href="/" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none' }}>
+        <div style={{ textAlign: "center", marginTop: "2rem" }}>
+          <a
+            href="/"
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "0.875rem",
+              textDecoration: "none",
+            }}
+          >
             ← Povratak na početnu
           </a>
         </div>
