@@ -21,7 +21,8 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { bs } from "date-fns/locale";
-import sponzorImg from "../images/sponzor.png";
+import sponzorImg from "../images/gumam.png";
+import sponzorImgLight from "../images/gumam2.png";
 import sponzor2Img from "../images/sponzor2.png";
 import sponzor3Img from "../images/sponzor3.png";
 import sponzor4Img from "../images/sponzor4.png";
@@ -32,9 +33,11 @@ import sponzor8Img from "../images/sponzor8.png";
 import sponzor9Img from "../images/sponzor9.png";
 import sponzor10Img from "../images/sponzor10.png";
 import teretnjaci from "../images/teretnjaci.png";
+import { useTheme } from "../context/ThemeContext";
 
 const Home = () => {
   const [searchParams] = useSearchParams();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [latestArticles, setLatestArticles] = useState([]);
   const [popularArticles, setPopularArticles] = useState([]);
@@ -47,7 +50,7 @@ const Home = () => {
 
   const sponsors = useMemo(
     () => [
-      { img: sponzorImg, url: "https://esplast.ba/" },
+      { img: theme === "dark" ? sponzorImg : sponzorImgLight, url: "https://gumam.com/" },
       { img: sponzor2Img, url: "https://www.eurolimun.com/" },
       { img: sponzor3Img, url: "https://www.febi.com/" },
       { img: sponzor4Img, url: "https://truckshop.ba/" },
@@ -61,7 +64,7 @@ const Home = () => {
       { img: sponzor9Img, url: "https://balkanhidraulik.com/hr/" },
       { img: sponzor10Img, url: "https://www.timocom.com.hr/" },
     ],
-    []
+    [theme]
   );
 
   useEffect(() => {
