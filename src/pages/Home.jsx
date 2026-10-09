@@ -1,3 +1,4 @@
+import Seo from "../components/Seo";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
@@ -244,6 +245,7 @@ const Home = () => {
 
   return (
     <>
+      <Seo path="/" />
       {!searchQuery && featuredArticle && (
         <section className="hero-section fade-in-up">
           <div className="container">

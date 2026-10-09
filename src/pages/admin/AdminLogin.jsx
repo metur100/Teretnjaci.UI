@@ -1,3 +1,4 @@
+import Seo from "../../components/Seo";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -92,6 +93,7 @@ const AdminLogin = () => {
           "linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%)",
       }}
     >
+      <Seo title="Administracija" noindex />
       <div
         style={{
           maxWidth: "400px",

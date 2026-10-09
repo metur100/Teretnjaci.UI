@@ -1,3 +1,4 @@
+import Seo from "../components/Seo";
 import { useEffect } from "react";
 
 const PrivacyPolicy = () => {
@@ -6,6 +7,8 @@ const PrivacyPolicy = () => {
   }, []);
 
   return (
+    <>
+    <Seo title="Politika privatnosti" path="/politika-privatnosti" description="Politika privatnosti portala Teretnjaci.ba – koje podatke prikupljamo i kako ih koristimo." />
     <div
       className="container"
       style={{ padding: "2rem 1rem", maxWidth: "800px", margin: "0 auto" }}
@@ -162,6 +165,7 @@ const PrivacyPolicy = () => {
         </p>
       </section>
     </div>
+    </>
   );
 };
 

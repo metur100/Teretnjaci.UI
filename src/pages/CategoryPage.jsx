@@ -1,3 +1,4 @@
+import Seo from "../components/Seo";
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams, useLocation } from "react-router-dom";
 import { articlesApi, categoriesApi } from "../services/api";
@@ -168,8 +169,14 @@ if (loading) {
   const startArticle = (currentPage - 1) * pageSize + 1;
   const endArticle = Math.min(currentPage * pageSize, totalArticles);
 
+  const categoryName = category.name || category.Name;
   return (
     <div className="fade-in-up">
+      <Seo
+        title={`${categoryName}${currentPage > 1 ? ` – stranica ${currentPage}` : ""}`}
+        path={`/kategorija/${slug}${currentPage > 1 ? `?page=${currentPage}` : ""}`}
+        description={`${categoryName} – najnovije vijesti i objave za vozače kamiona i prevoznike na Teretnjaci.ba.`}
+      />
       <section
         style={{
           background:

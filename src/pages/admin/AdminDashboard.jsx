@@ -1,3 +1,4 @@
+import Seo from "../../components/Seo";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -65,6 +66,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
+      <Seo title="Administracija" noindex />
       {/* Mobile Header */}
       {isMobile && (
         <div className="admin-mobile-header">

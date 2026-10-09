@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import Seo, { SITE_URL, summarize } from "../components/Seo";
 import { articlesApi } from "../services/api";
 import { format } from "date-fns";
 import { bs } from "date-fns/locale";
@@ -178,18 +178,7 @@ const ArticleDetail = () => {
   if (!article) {
     return (
       <>
-        <Helmet>
-          <title>Članak nije pronađen - Teretnjaci.ba</title>
-          <meta property="og:title" content="Teretnjaci.ba" />
-          <meta
-            property="og:image"
-            content="https://i.ibb.co/wFNwCtMZ/441a68a4f946.png"
-          />
-          <meta
-            name="description"
-            content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć"
-          />
-        </Helmet>
+        <Seo title="Članak nije pronađen" noindex />
         <div
           className="container"
           style={{ padding: "4rem 1rem", textAlign: "center" }}
@@ -229,15 +218,29 @@ const ArticleDetail = () => {
   return (
     <div className="article-detail">
       {/* Dynamic Meta Tags for Social Sharing */}
-      <Helmet>
-        <title>{title}</title>
-        <meta property="og:title" content={title} />
-        <meta property="og:image" content={ogImage} />
-        <meta
-          name="description"
-          content="Teretnjaci.ba - Vijesti, saobraćaj i pomoć"
-        />
-      </Helmet>
+      <Seo
+        title={title}
+        description={summarize(content) || undefined}
+        path={`/clanak/${slug}`}
+        image={ogImage}
+        type="article"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
+          headline: title,
+          description: summarize(content),
+          image: [ogImage],
+          datePublished: publishedAt || undefined,
+          author: authorName ? { "@type": "Person", name: authorName } : { "@type": "Organization", name: "Teretnjaci.ba" },
+          publisher: { "@id": `${SITE_URL}/#organization` },
+          mainEntityOfPage: `${SITE_URL}/clanak/${slug}`,
+          articleSection: categoryName || undefined,
+          inLanguage: "bs",
+        }}
+      >
+        {publishedAt ? <meta property="article:published_time" content={new Date(publishedAt).toISOString()} /> : null}
+        {categoryName ? <meta property="article:section" content={categoryName} /> : null}
+      </Seo>
 
       <div className="article-header">
         <div

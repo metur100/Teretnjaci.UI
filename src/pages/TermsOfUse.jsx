@@ -1,3 +1,4 @@
+import Seo from "../components/Seo";
 import { useEffect } from "react";
 
 const TermsOfUse = () => {
@@ -6,6 +7,8 @@ const TermsOfUse = () => {
   }, []);
 
   return (
+    <>
+    <Seo title="Uslovi korištenja" path="/uslovi-koristenja" description="Uslovi korištenja portala Teretnjaci.ba." />
     <div
       className="container"
       style={{ padding: "2rem 1rem", maxWidth: "800px", margin: "0 auto" }}
@@ -261,6 +264,7 @@ const TermsOfUse = () => {
         </p>
       </section>
     </div>
+    </>
   );
 };
 
